@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "vic-atar-trackers"
+version = "0.1.0"
+description = ""
+authors = ["Yass Eltahir <yeltahir@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "vic_atar_trackers" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.1.4"
+jupyter = "^1.0.0"
+plotly = "^5.18.0"
+openpyxl = "^3.1.2"
+dash = "^2.14.2"
+dash-bootstrap-components = "^1.5.0"
+dash-bootstrap-templates = "^1.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
