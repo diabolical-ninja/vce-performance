@@ -26,7 +26,7 @@ You'll also need school profile data from ACARA: https://acara.edu.au/docs/defau
 To create a cleaned dataset for analysis run:
 
 ```sh
-poetry run python src/data_loader.py
+poetry run python data_loader.py
 ```
 
 This merges all years into one, drops a bunch of columns that aren't of interest and merges the VCE results with the school profiles information. It will produce a file called `vce_school_results_analysis_dataset.csv`.
