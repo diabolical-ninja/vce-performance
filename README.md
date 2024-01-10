@@ -15,9 +15,13 @@ Explores VCE study scores by school. It produces a plotly dash web app that allo
 
 ### Raw Files
 
-Downloaded from: https://www.vcaa.vic.edu.au/administration/research-and-statistics/Pages/SeniorSecondaryCompletion.aspx
+The data used for this project resides in `raw_data/`. If you want to reproduce it from scratch then you'll need to download it from: https://www.vcaa.vic.edu.au/administration/research-and-statistics/Pages/SeniorSecondaryCompletion.aspx
 
-Note; you'll need to use the wayback machine to get all of the history
+Some notes;
+
+- the wayback machine will be required to get all of the history
+- `postcompletiondata-schools-2014-2017.xlsx` has been manually created by copying the contents of the `pdf` files into a spreadsheet
+- I think data for 2012 & 2013 should also exist. I can't find it but would love to add it in
 
 You'll also need school profile data from ACARA: https://acara.edu.au/docs/default-source/default-document-library/school-profile-2008-2022.xlsx?sfvrsn=d40e4c07_0
 
