@@ -7,15 +7,7 @@ from dash_bootstrap_templates import load_figure_template
 load_figure_template("bootstrap")
 
 analysis_df = pd.read_csv("vce_school_results_analysis_dataset.csv")
-average_median_study_score = (
-    analysis_df.groupby(["School", "School Sector", "School Type"])[
-        "Median VCE study score"
-    ]
-    .mean()
-    .reset_index()
-    .sort_values(ascending=False, by="Median VCE study score")
-    .reset_index(drop=True)
-)
+
 
 app = Dash(
     __name__,
@@ -55,23 +47,80 @@ historical_school_performance_tab = html.Div(
 
 top_schools_tab = html.Div(
     [
-        html.P(
-            "Determined by the average of the median study score for all available years between 2014 and 2023",
-            style={"margin-top": 20, "margin-bottom": 20},
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label("School Type:"),
+                            dcc.Dropdown(
+                                ["Independent", "Government", "Catholic"],
+                                multi=True,
+                                value=["Independent", "Government", "Catholic"],
+                                id="school-type",
+                            ),
+                        ],
+                        style={"margin-bottom": 20},
+                    ),
+                    width=5,
+                ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label("Results Year:"),
+                            dcc.Dropdown(
+                                ["All"] + analysis_df["year"].unique().tolist(),
+                                value="All",
+                                id="result-year",
+                            ),
+                        ],
+                        style={"margin-bottom": 20},
+                    ),
+                    width=5,
+                ),
+            ],
+            justify="around",
+            style={"margin-top": 20},
         ),
-        dcc.Dropdown(
-            ["Independent", "Government", "Catholic"],
-            multi=True,
-            value=["Independent", "Government", "Catholic"],
-            id="school-type",
-        ),
-        dcc.Slider(
-            min=0,
-            max=50,
-            value=10,
-            step=1,
-            marks={i: str(i) for i in range(0, 51, 5)},
-            id="top-n-selection",
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label("Top N Schools:"),
+                            dcc.Slider(
+                                min=0,
+                                max=50,
+                                value=10,
+                                step=1,
+                                marks={i: str(i) for i in range(0, 51, 5)},
+                                id="top-n-selection",
+                            ),
+                        ],
+                        style={"margin-bottom": 20},
+                    ),
+                    width=5,
+                ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label(
+                                "Minimum School Enrollment:",
+                                style={"margin-right": 8},
+                            ),
+                            dcc.Input(
+                                placeholder="Minimum school entrollment...",
+                                type="number",
+                                value=50,
+                                id="minimum-enrolments",
+                            ),
+                        ],
+                        style={"margin-bottom": 20},
+                    ),
+                    width=5,
+                ),
+            ],
+            justify="around",
         ),
         dcc.Graph(
             id="top-n-schools",
@@ -136,17 +185,43 @@ def update_school_performance_over_time(statistic_to_plot, schools):
         ),
     )
 
+    statistic_over_time_fig.update_layout(
+        legend=dict(yanchor="top", xanchor="left", y=1.1, orientation="h")
+    )
+
     return statistic_over_time_fig
 
 
 @callback(
     Output("top-n-schools", "figure"),
     Input("school-type", "value"),
+    Input("result-year", "value"),
     Input("top-n-selection", "value"),
+    Input("minimum-enrolments", "value"),
 )
-def update_top_n_schools(school_type, top_n):
+def update_top_n_schools(school_type, result_year, top_n, min_enrolments):
     if school_type is None:
         school_type = []
+
+    if result_year == "All":
+        result_year = analysis_df["year"].unique().tolist()
+    else:
+        result_year = [result_year]
+
+    average_median_study_score = (
+        analysis_df[analysis_df["year"].isin(result_year)]
+        .groupby(["School", "School Sector", "School Type"])[
+            ["Median VCE study score", "Total Enrolments"]
+        ]
+        .mean()
+        .reset_index()
+        .sort_values(ascending=False, by="Median VCE study score")
+        .reset_index(drop=True)
+    )
+
+    average_median_study_score = average_median_study_score[
+        average_median_study_score["Total Enrolments"] >= min_enrolments
+    ]
 
     top_n_schools = (
         average_median_study_score[
@@ -190,6 +265,10 @@ def update_top_n_schools(school_type, top_n):
             ticktext=top_n_schools["School"].tolist(),
         ),
         height=calculated_height,
+    )
+
+    top_ranked_schools_fig.update_layout(
+        legend=dict(yanchor="top", xanchor="left", y=1.1, orientation="h")
     )
 
     return top_ranked_schools_fig
