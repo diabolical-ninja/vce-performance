@@ -237,6 +237,7 @@ def create_analysis_dataset(save: bool = True):
         school_profile_df,
         left_on=["join_key", "year"],
         right_on=["School Name", "Calendar Year"],
+        how="left",
     )
 
     # TO-DO:
