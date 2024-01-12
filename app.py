@@ -18,6 +18,8 @@ app = Dash(
     title="School Comparison",
 )
 
+server = app.server
+
 
 historical_school_performance_tab = html.Div(
     [
