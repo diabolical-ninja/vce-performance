@@ -9,7 +9,6 @@ Explores VCE study scores by school. It produces a plotly dash web app that allo
 
 - [ ] Go through the fuzzy match of school names & correct the mistakes
   - There are quite a few unfortunately :(
-- [ ] For the "top schools" plot, add a minimum enrolments selector
 
 ## Data
 
