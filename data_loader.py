@@ -162,7 +162,10 @@ def get_vic_school_profiles() -> pd.DataFrame:
         "Total Enrolments",
     ]
 
-    return school_profile_df[school_profile_df["State"] == "VIC"][wanted_cols]
+    return school_profile_df[
+        (school_profile_df["State"] == "VIC")
+        & (school_profile_df["School Type"] != "Primary")
+    ][wanted_cols]
 
 
 def get_close_match(school_name: str, school_name_options: Iterable) -> str:
