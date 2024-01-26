@@ -11,7 +11,7 @@ analysis_df = pd.read_csv("vce_school_results_analysis_dataset.csv")
 
 app = Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
     meta_tags=[
         {"name": "viewport", "content": "width=device-width, initial-scale=1"},
     ],
@@ -130,9 +130,56 @@ top_schools_tab = html.Div(
     ]
 )
 
+about_tab = html.Div(
+    [
+        dcc.Markdown(
+            """
+            Inspirsed by The Age's schools that excel but with the ability to compare schools and rank them.
+
+            ### Data Sources
+            Data comes from two locations:    
+            1. VCE results from VCAA [Senior secondary completion and achievement information](https://www.vcaa.vic.edu.au/administration/research-and-statistics/Pages/SeniorSecondaryCompletion.aspx)    
+            2. [School profile](https://acara.edu.au/contact-us/acara-data-access) data is sourced from ACARA. This provides school sector (public, independent, catholic), ICSEA, etc.    
+            """
+        ),
+    ],
+)
+
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            dbc.NavbarBrand("Historical VCE Performance", href="#"),
+            dbc.Nav(
+                [
+                    dbc.NavItem(
+                        dbc.Button(
+                            [
+                                html.Img(
+                                    src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg",
+                                    height="25px",
+                                ),
+                                "  View Source",
+                            ],
+                            href="https://github.com/diabolical-ninja/vce-performance",
+                            target="_blank",
+                            color="light",
+                            className="mr-2",
+                        )
+                    )
+                ],
+                className="ml-auto",
+                navbar=True,
+            ),
+        ]
+    ),
+    color="dark",
+    dark=True,
+    style={"margin-bottom": 20},
+)
+
 app.layout = dbc.Container(
     [
-        html.H1(children="Schools That Excel-Ish"),
+        navbar,
         dbc.Tabs(
             [
                 dbc.Tab(
@@ -141,6 +188,7 @@ app.layout = dbc.Container(
                     tab_id="historical-school-performance",
                 ),
                 dbc.Tab(top_schools_tab, label="Top Schools", tab_id="top-schools"),
+                dbc.Tab(about_tab, label="About", tab_id="about"),
             ],
             id="tabs",
             active_tab="historical-school-performance",
