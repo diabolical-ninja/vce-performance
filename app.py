@@ -7,6 +7,9 @@ from dash_bootstrap_templates import load_figure_template
 load_figure_template("bootstrap")
 
 analysis_df = pd.read_csv("vce_school_results_analysis_dataset.csv")
+analysis_df["School"].fillna("Not Yet Known", inplace=True)
+analysis_df["School Sector"].fillna("Not Yet Known", inplace=True)
+analysis_df["School Type"].fillna("Not Yet Known", inplace=True)
 
 
 app = Dash(
@@ -52,6 +55,28 @@ top_schools_tab = html.Div(
         dbc.Row(
             [
                 dbc.Col(
+                    dcc.Dropdown(
+                        [
+                            "Median VCE study score",
+                            "Percentage of study scores of 40 and over",
+                            "Percentage of VCE students applying for tertiary places",
+                            "Percentage of satisfactory VCE completions",
+                            "ICSEA",
+                            # "Total Enrolments", # Currently causes a callback issue because it's being used for grouping as well
+                        ],
+                        value="Median VCE study score",
+                        id="top-n-statistic-selection",
+                    ),
+                    width=5,
+                ),
+                dbc.Col(width=5),
+            ],
+            justify="around",
+            style={"margin-top": 20},
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
                     html.Div(
                         [
                             html.Label("School Type:"),
@@ -71,7 +96,10 @@ top_schools_tab = html.Div(
                         [
                             html.Label("Results Year:"),
                             dcc.Dropdown(
-                                ["All"] + analysis_df["year"].unique().tolist(),
+                                ["All"]
+                                + sorted(
+                                    analysis_df["year"].unique().tolist(), reverse=True
+                                ),
                                 value="All",
                                 id="result-year",
                             ),
@@ -143,6 +171,7 @@ about_tab = html.Div(
             """
         ),
     ],
+    style={"margin-top": 20},
 )
 
 navbar = dbc.Navbar(
@@ -244,14 +273,19 @@ def update_school_performance_over_time(statistic_to_plot, schools):
 
 @callback(
     Output("top-n-schools", "figure"),
+    Input("top-n-statistic-selection", "value"),
     Input("school-type", "value"),
     Input("result-year", "value"),
     Input("top-n-selection", "value"),
     Input("minimum-enrolments", "value"),
 )
-def update_top_n_schools(school_type, result_year, top_n, min_enrolments):
+def update_top_n_schools(
+    top_n_statistic, school_type, result_year, top_n, min_enrolments
+):
     if school_type is None:
         school_type = []
+    else:
+        school_type.append("Not Yet Known")
 
     if result_year == "All":
         result_year = analysis_df["year"].unique().tolist()
@@ -261,29 +295,30 @@ def update_top_n_schools(school_type, result_year, top_n, min_enrolments):
     average_median_study_score = (
         analysis_df[analysis_df["year"].isin(result_year)]
         .groupby(["School", "School Sector", "School Type"])[
-            ["Median VCE study score", "Total Enrolments"]
+            [top_n_statistic, "Total Enrolments"]
         ]
         .mean()
         .reset_index()
-        .sort_values(ascending=False, by="Median VCE study score")
+        .sort_values(ascending=False, by=top_n_statistic)
         .reset_index(drop=True)
     )
 
-    average_median_study_score = average_median_study_score[
-        average_median_study_score["Total Enrolments"] >= min_enrolments
-    ]
+    if average_median_study_score["Total Enrolments"].sum() != 0:
+        average_median_study_score = average_median_study_score[
+            average_median_study_score["Total Enrolments"] >= min_enrolments
+        ]
 
     top_n_schools = (
         average_median_study_score[
             average_median_study_score["School Sector"].isin(school_type)
         ]
         .head(top_n)
-        .sort_values(ascending=True, by="Median VCE study score")
+        .sort_values(ascending=True, by=top_n_statistic)
     )
 
     spacer = 0.5
-    x_min = top_n_schools["Median VCE study score"].min() - spacer
-    x_max = top_n_schools["Median VCE study score"].max() + spacer
+    x_min = top_n_schools[top_n_statistic].min() - spacer
+    x_max = top_n_schools[top_n_statistic].max() + spacer
 
     color_discrete_map = {
         "Independent": "#636EFA",
@@ -294,7 +329,7 @@ def update_top_n_schools(school_type, result_year, top_n, min_enrolments):
     top_ranked_schools_fig = px.bar(
         top_n_schools,
         y="School",
-        x="Median VCE study score",
+        x=top_n_statistic,
         color="School Sector",
         orientation="h",
         hover_data=[
