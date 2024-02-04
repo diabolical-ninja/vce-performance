@@ -4,6 +4,7 @@ Explores VCE study scores by school. It produces a plotly dash web app that allo
 
 - Comparing how schools perform over time, eg via their median study score
 - A ranking of the "top-N" schools
+- A map to see how VCE results change across Melbourne/the state
 
 ## To-Do
 
