@@ -458,7 +458,12 @@ def update_schools_map(statistic_selection, school_type, results_year):
         height=550,
         center=dict(lat=-37.8136, lon=144.9631),
         color_continuous_scale="Jet",
-        hover_data={"School": True, "Latitude": False, "Longitude": False},
+        hover_data={
+            "School": True,
+            "School Sector": True,
+            "Latitude": False,
+            "Longitude": False,
+        },
     )
 
     schools_map_fig.update_layout(margin=dict(l=30, r=30, t=60, b=30))
