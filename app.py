@@ -1,3 +1,6 @@
+"""Main dash app to display VCE result info."""
+import os
+
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
@@ -5,6 +8,7 @@ from dash import Dash, Input, Output, callback, dcc, html
 from dash_bootstrap_templates import load_figure_template
 
 load_figure_template("bootstrap")
+px.set_mapbox_access_token(os.getenv("MAPBOX_TOKEN"))
 
 analysis_df = pd.read_csv("vce_school_results_analysis_dataset.csv")
 analysis_df["School"].fillna("Not Yet Known", inplace=True)
@@ -23,6 +27,37 @@ app = Dash(
 
 server = app.server
 
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            dbc.NavbarBrand("Historical VCE Performance", href="#"),
+            dbc.Nav(
+                [
+                    dbc.NavItem(
+                        dbc.Button(
+                            [
+                                html.Img(
+                                    src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg",
+                                    height="25px",
+                                ),
+                                "  View Source",
+                            ],
+                            href="https://github.com/diabolical-ninja/vce-performance",
+                            target="_blank",
+                            color="light",
+                            className="mr-2",
+                        )
+                    )
+                ],
+                className="ml-auto",
+                navbar=True,
+            ),
+        ]
+    ),
+    color="dark",
+    dark=True,
+    style={"margin-bottom": 20},
+)
 
 historical_school_performance_tab = html.Div(
     [
@@ -37,7 +72,7 @@ historical_school_performance_tab = html.Div(
                 "Total Enrolments",
             ],
             value="Median VCE study score",
-            id="statistic-selection",
+            id="historical-performance-statistic-selection",
         ),
         dcc.Dropdown(
             analysis_df["School"].unique(),
@@ -48,7 +83,6 @@ historical_school_performance_tab = html.Div(
         dcc.Graph(id="school-performance-over-time"),
     ]
 )
-
 
 top_schools_tab = html.Div(
     [
@@ -158,6 +192,73 @@ top_schools_tab = html.Div(
     ]
 )
 
+schools_map_tab = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Dropdown(
+                        [
+                            "Median VCE study score",
+                            "Percentage of study scores of 40 and over",
+                            "Percentage of VCE students applying for tertiary places",
+                            "Percentage of satisfactory VCE completions",
+                            "ICSEA",
+                            "Total Enrolments",  # Currently causes a callback issue because it's being used for grouping as well
+                        ],
+                        value="Median VCE study score",
+                        id="schools-map-statistic-selection",
+                    ),
+                    width=5,
+                ),
+                dbc.Col(width=5),
+            ],
+            justify="around",
+            style={"margin-top": 20},
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label("School Type:"),
+                            dcc.Dropdown(
+                                ["Independent", "Government", "Catholic"],
+                                multi=True,
+                                value=["Independent", "Government", "Catholic"],
+                                id="school-map-school-type",
+                            ),
+                        ],
+                        style={"margin-bottom": 0},
+                    ),
+                    width=5,
+                ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.Label("Results Year:"),
+                            dcc.Dropdown(
+                                sorted(
+                                    analysis_df["year"].unique().tolist(), reverse=True
+                                )[1:],
+                                value=2022,
+                                id="result-year-no-2023",
+                            ),
+                        ],
+                        style={"margin-bottom": 0},
+                    ),
+                    width=5,
+                ),
+            ],
+            justify="around",
+            style={"margin-top": 20},
+        ),
+        dcc.Graph(
+            id="schools-map",
+        ),
+    ]
+)
+
 about_tab = html.Div(
     [
         dcc.Markdown(
@@ -174,37 +275,6 @@ about_tab = html.Div(
     style={"margin-top": 20},
 )
 
-navbar = dbc.Navbar(
-    dbc.Container(
-        [
-            dbc.NavbarBrand("Historical VCE Performance", href="#"),
-            dbc.Nav(
-                [
-                    dbc.NavItem(
-                        dbc.Button(
-                            [
-                                html.Img(
-                                    src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg",
-                                    height="25px",
-                                ),
-                                "  View Source",
-                            ],
-                            href="https://github.com/diabolical-ninja/vce-performance",
-                            target="_blank",
-                            color="light",
-                            className="mr-2",
-                        )
-                    )
-                ],
-                className="ml-auto",
-                navbar=True,
-            ),
-        ]
-    ),
-    color="dark",
-    dark=True,
-    style={"margin-bottom": 20},
-)
 
 app.layout = dbc.Container(
     [
@@ -217,6 +287,7 @@ app.layout = dbc.Container(
                     tab_id="historical-school-performance",
                 ),
                 dbc.Tab(top_schools_tab, label="Top Schools", tab_id="top-schools"),
+                dbc.Tab(schools_map_tab, label="Schools Map", tab_id="tab-schools-map"),
                 dbc.Tab(about_tab, label="About", tab_id="about"),
             ],
             id="tabs",
@@ -229,7 +300,7 @@ app.layout = dbc.Container(
 
 @callback(
     Output("school-performance-over-time", "figure"),
-    Input("statistic-selection", "value"),
+    Input("historical-performance-statistic-selection", "value"),
     Input("school-selection", "value"),
 )
 def update_school_performance_over_time(statistic_to_plot, schools):
@@ -357,6 +428,42 @@ def update_top_n_schools(
     )
 
     return top_ranked_schools_fig
+
+
+@callback(
+    Output("schools-map", "figure"),
+    Input("schools-map-statistic-selection", "value"),
+    Input("school-map-school-type", "value"),
+    Input("result-year-no-2023", "value"),
+)
+def update_schools_map(statistic_selection, school_type, results_year):
+    if school_type is None:
+        school_type = []
+
+    plot_df = analysis_df[
+        (analysis_df["year"] == results_year)
+        & (analysis_df["School Sector"].isin(school_type))
+    ]
+    plot_df = plot_df[~plot_df[statistic_selection].isna()]
+
+    schools_map_fig = px.scatter_mapbox(
+        plot_df,
+        lat="Latitude",
+        lon="Longitude",
+        color=statistic_selection,
+        opacity=1.0,
+        size=statistic_selection,
+        size_max=7,
+        zoom=9,
+        height=550,
+        center=dict(lat=-37.8136, lon=144.9631),
+        color_continuous_scale="Jet",
+        hover_data={"School": True},
+    )
+
+    schools_map_fig.update_layout(margin=dict(l=30, r=30, t=60, b=30))
+
+    return schools_map_fig
 
 
 if __name__ == "__main__":
