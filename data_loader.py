@@ -149,11 +149,11 @@ def get_vic_school_profiles() -> pd.DataFrame:
     school_profile_df = pd.read_excel(xls, "SchoolProfile 2008-2022")
 
     # Filter School Profile data to Vic Only for this analysis
-
     # And get rid of most of the columns as they're not needed
     wanted_cols = [
         "Calendar Year",
         "School Name",
+        "ACARA SML ID",
         "Suburb",
         "School Sector",
         "School Type",
@@ -165,6 +165,21 @@ def get_vic_school_profiles() -> pd.DataFrame:
     return school_profile_df[
         (school_profile_df["State"] == "VIC")
         & (school_profile_df["School Type"] != "Primary")
+    ][wanted_cols]
+
+
+def get_vic_school_locations() -> pd.DataFrame:
+    # School Location Information
+    xls = pd.ExcelFile("raw_data/school-location-2008-2022.xlsx")
+    school_locations_df = pd.read_excel(xls, "SchoolLocations 2008-2022")
+
+    # Filter School Profile data to Vic Only for this analysis
+    # And get rid of most of the columns as they're not needed
+    wanted_cols = ["Calendar Year", "ACARA SML ID", "Latitude", "Longitude"]
+
+    return school_locations_df[
+        (school_locations_df["State"] == "VIC")
+        & (school_locations_df["School Type"] != "Primary")
     ][wanted_cols]
 
 
@@ -192,7 +207,7 @@ def create_joining_key(
 
     # This unfortunately knocks out a few legit schools that difflib couldn't pick up
     # Manually add them back in
-    keys = keys + [
+    fixers = [
         {
             "school_name": "Ballarat SC - Mount Rowan",
             "join_key": "Mount Rowan Secondary College",
@@ -209,7 +224,15 @@ def create_joining_key(
             "school_name": "Keysborough SC - Banksia",
             "join_key": "Keysborough Secondary College",
         },
+        {
+            "school_name": "Footscray High School",
+            "join_key": "Footscray Learning Precinct Secondary College (interim name)",
+        },
     ]
+
+    fixer_schools = [x["school_name"] for x in fixers]
+    keys = [x for x in keys if x["school_name"] not in fixer_schools]
+    keys = keys + fixers
 
     # Difflib also flips out on a bunch. Manually fix those...
     # Ashwood Secondary College
@@ -227,6 +250,14 @@ def create_analysis_dataset(save: bool = True):
 
     print("Sourcing school profile data")
     school_profile_df = get_vic_school_profiles()
+
+    print("Sourcing school location data")
+    school_locations_df = get_vic_school_locations()
+
+    # Append location data to school profile data
+    school_profile_df = pd.merge(
+        school_profile_df, school_locations_df, on=["ACARA SML ID", "Calendar Year"]
+    )
 
     # Append school information to results data
     print("Joining school profile data to VCE results")
@@ -250,6 +281,7 @@ def create_analysis_dataset(save: bool = True):
 
     cols_for_analysis = [
         "School",
+        "ACARA SML ID",
         "year",
         "Locality",
         "Median VCE study score",
@@ -260,6 +292,8 @@ def create_analysis_dataset(save: bool = True):
         "School Sector",
         "School Type",
         "Total Enrolments",
+        "Latitude",
+        "Longitude",
     ]
 
     analysis_df = results_df[cols_for_analysis].sort_values(

@@ -4,6 +4,7 @@ Explores VCE study scores by school. It produces a plotly dash web app that allo
 
 - Comparing how schools perform over time, eg via their median study score
 - A ranking of the "top-N" schools
+- A map to see how VCE results change across Melbourne/the state
 
 ## To-Do
 
@@ -22,7 +23,10 @@ Some notes;
 - `postcompletiondata-schools-2014-2017.xlsx` has been manually created by copying the contents of the `pdf` files into a spreadsheet
 - I think data for 2012 & 2013 should also exist. I can't find it but would love to add it in
 
-You'll also need school profile data from ACARA: https://acara.edu.au/docs/default-source/default-document-library/school-profile-2008-2022.xlsx?sfvrsn=d40e4c07_0
+You'll also need school profile & school location data from ACARA:
+
+- https://acara.edu.au/docs/default-source/default-document-library/school-profile-2008-2022.xlsx?sfvrsn=d40e4c07_0
+- https://acara.edu.au/docs/default-source/default-document-library/school-location-2008-2022.xlsx?sfvrsn=fc4e4c07_0
 
 ### Building an Analytical Dataset
 
