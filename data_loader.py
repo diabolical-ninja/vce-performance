@@ -208,7 +208,7 @@ def create_analysis_dataset(save: bool = True):
 
     # Append school information to results data
     print("Joining school profile data to VCE results")
-    joining_table = pd.read_csv("raw_data/school_name_joining_keys.csv.csv")
+    joining_table = pd.read_csv("raw_data/school_name_joining_keys.csv")
 
     results_df = pd.merge(
         results_df, joining_table, left_on="School", right_on="vce_school_name"
