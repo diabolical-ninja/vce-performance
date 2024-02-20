@@ -191,59 +191,6 @@ def get_close_match(school_name: str, school_name_options: Iterable) -> str:
     return None
 
 
-def create_joining_key(
-    school_name_results: Iterable, school_name_profile: Iterable
-) -> pd.DataFrame:
-    keys = [
-        {
-            "school_name": x,
-            "join_key": get_close_match(x, school_name_profile),
-        }
-        for x in school_name_results
-    ]
-
-    # A bunch of TAFEs don't have school info. For the purposes of this analysis, exclude them
-    keys = [x for x in keys if x["join_key"] is not None]
-
-    # This unfortunately knocks out a few legit schools that difflib couldn't pick up
-    # Manually add them back in
-    fixers = [
-        {
-            "school_name": "Ballarat SC - Mount Rowan",
-            "join_key": "Mount Rowan Secondary College",
-        },
-        {
-            "school_name": "Ballarat SC - Woodmans Hill",
-            "join_key": "Woodmans Hill Secondary College",
-        },
-        {
-            "school_name": "Keysborough SC - Acacia",
-            "join_key": "Keysborough Secondary College",
-        },
-        {
-            "school_name": "Keysborough SC - Banksia",
-            "join_key": "Keysborough Secondary College",
-        },
-        {
-            "school_name": "Footscray High School",
-            "join_key": "Footscray Learning Precinct Secondary College (interim name)",
-        },
-    ]
-
-    fixer_schools = [x["school_name"] for x in fixers]
-    keys = [x for x in keys if x["school_name"] not in fixer_schools]
-    keys = keys + fixers
-
-    # Difflib also flips out on a bunch. Manually fix those...
-    # Ashwood Secondary College
-    # Ballarat Secondary College
-    # Brauer College
-    # St Catherine's School when joined is both a Catholic primary school AND Indepdendent combined school. Debug this!
-
-    # %%
-    return pd.DataFrame(keys)
-
-
 def create_analysis_dataset(save: bool = True):
     print("Collating VCE Results Files")
     results_df = get_results()
@@ -261,16 +208,16 @@ def create_analysis_dataset(save: bool = True):
 
     # Append school information to results data
     print("Joining school profile data to VCE results")
-    keys_df = create_joining_key(
-        results_df["School"].unique(), school_profile_df["School Name"].unique()
-    )
+    joining_table = pd.read_csv("raw_data/school_name_joining_keys.csv")
 
-    results_df = pd.merge(results_df, keys_df, left_on="School", right_on="school_name")
+    results_df = pd.merge(
+        results_df, joining_table, left_on="School", right_on="vce_school_name"
+    )
     results_df = pd.merge(
         results_df,
         school_profile_df,
-        left_on=["join_key", "year"],
-        right_on=["School Name", "Calendar Year"],
+        left_on=["ACARA SML ID", "year"],
+        right_on=["ACARA SML ID", "Calendar Year"],
         how="left",
     )
 

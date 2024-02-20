@@ -4,12 +4,7 @@ Explores VCE study scores by school. It produces a plotly dash web app that allo
 
 - Comparing how schools perform over time, eg via their median study score
 - A ranking of the "top-N" schools
-- A map to see how VCE results change across Melbourne/the state
-
-## To-Do
-
-- [ ] Go through the fuzzy match of school names & correct the mistakes
-  - There are quite a few unfortunately :(
+- A map to see how VCE results change across Melbourne/the state``
 
 ## Data
 
@@ -38,7 +33,25 @@ poetry run python data_loader.py
 
 This merges all years into one, drops a bunch of columns that aren't of interest and merges the VCE results with the school profiles information. It will produce a file called `vce_school_results_analysis_dataset.csv`.
 
-## Run the Web App
+### Notes on the Data
+
+Of course, OF COURSE, the Victorian and federal governments (ACARA) don't name schools the same thing. As such a lookup table has been manually created to map the Victorian school name to the ACARA name. This is required to join the VCE results to information such as the school location, school's ICSEA, etc.
+
+This is by no means perfect so if you find errors please raise an issue or better yet raise a PR with the proposed fix.
+
+## Running the Web App
+
+A [mapbox token](https://docs.mapbox.com/help/getting-started/access-tokens/) is required for the `Schools Map` page to work. Create a token and set the environment variable:
+
+```bash
+export MAPBOX_TOKEN={your token}
+```
+
+Build the environment:
+
+```bash
+poetry install
+```
 
 Start up the app:
 
