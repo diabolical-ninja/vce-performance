@@ -37,7 +37,7 @@ This merges all years into one, drops a bunch of columns that aren't of interest
 
 Of course, OF COURSE, the Victorian and federal governments (ACARA) don't name schools the same thing. As such a lookup table has been manually created to map the Victorian school name to the ACARA name. This is required to join the VCE results to information such as the school location, school's ICSEA, etc.
 
-This is by no means perfect so if you find errors either raise an issue or better yet raise a PR with the proposed fix.
+This is by no means perfect so if you find errors please raise an issue or better yet raise a PR with the proposed fix.
 
 ## Running the Web App
 
