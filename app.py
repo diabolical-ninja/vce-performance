@@ -466,7 +466,15 @@ def update_schools_map(statistic_selection, school_type, results_year):
         },
     )
 
-    schools_map_fig.update_layout(margin=dict(l=30, r=30, t=60, b=30))
+    schools_map_fig.update_layout(
+        margin=dict(l=30, r=30, t=60, b=30),
+        coloraxis_colorbar=dict(
+            orientation="h",
+            xanchor="left",
+            x=0,
+            y=-0.2,
+        ),
+    )
 
     return schools_map_fig
 
