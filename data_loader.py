@@ -160,6 +160,7 @@ def get_vic_school_profiles() -> pd.DataFrame:
         "Campus Type",
         "ICSEA",
         "Total Enrolments",
+        "Teaching Staff",
     ]
 
     return school_profile_df[
@@ -239,6 +240,7 @@ def create_analysis_dataset(save: bool = True):
         "School Sector",
         "School Type",
         "Total Enrolments",
+        "Teaching Staff",
         "Latitude",
         "Longitude",
     ]

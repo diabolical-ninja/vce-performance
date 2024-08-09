@@ -16,7 +16,7 @@ Some notes;
 
 - the wayback machine will be required to get all of the history
 - `postcompletiondata-schools-2014-2017.xlsx` has been manually created by copying the contents of the `pdf` files into a spreadsheet
-- I think data for 2012 & 2013 should also exist. I can't find it but would love to add it in
+- I think data for 2012 & 2013 should also exist. I can't find it but would love to add it in. Hit the repo up with a PR if you can find it
 
 You'll also need school profile & school location data from ACARA:
 
