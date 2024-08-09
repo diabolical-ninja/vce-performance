@@ -1,4 +1,5 @@
 """Main dash app to display VCE result info."""
+
 import os
 
 import dash_bootstrap_components as dbc
@@ -70,6 +71,7 @@ historical_school_performance_tab = html.Div(
                 "Percentage of satisfactory VCE completions",
                 "ICSEA",
                 "Total Enrolments",
+                "Teaching Staff",
             ],
             value="Median VCE study score",
             id="historical-performance-statistic-selection",
@@ -204,7 +206,8 @@ schools_map_tab = html.Div(
                             "Percentage of VCE students applying for tertiary places",
                             "Percentage of satisfactory VCE completions",
                             "ICSEA",
-                            "Total Enrolments",  # Currently causes a callback issue because it's being used for grouping as well
+                            "Total Enrolments",
+                            "Teaching Staff",
                         ],
                         value="Median VCE study score",
                         id="schools-map-statistic-selection",
@@ -323,6 +326,7 @@ def update_school_performance_over_time(statistic_to_plot, schools):
             "School Sector",
             "School Type",
             "Total Enrolments",
+            "Teaching Staff",
         ],
         markers=True,
         color="School",
