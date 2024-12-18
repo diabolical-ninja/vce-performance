@@ -116,6 +116,41 @@ def get_results() -> pd.DataFrame:
     results_2023["Adult School"] = None
     results_2023 = results_2023[STANDARDISED_COLUMN_NAMES]
 
+    results_2024 = pd.read_excel(
+        "raw_data/2024SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        skiprows=range(1, 10),
+        header=1,
+    )
+    results_2024["year"] = 2024
+    results_2024.rename(
+        columns={
+            "School": "School",
+            "Small School": "Small School",
+            "Locality": "Locality",
+            "Number of VCE, VCE Vocational Major (VM) studies and VCE VET programs at Units 3 and 4 level with enrolments ": "Number of VCE studies at unit 3-4 level taken up by students",
+            "Number of Vocational Education and Training (VET) certificates with enrolments": "Number of VET certificates with enrolments",
+            # This isn't strictly correct by will do
+            "Enrolment(s) in the\xa0International\xa0Baccalaureate (IB) Diploma": "Availability of International Baccalaureate (Diploma)",
+            "Number of students enrolled in at least one VCE or VCE Vocational Major (VM) study or VCE VET program at Units 3 and 4 level": "Number of students enrolled in at least one VCE unit at level 3-4",
+            "Number of students enrolled in a Vocational Education and Training (VET) certificate": "Number of students enrolled in a VET certificate",
+            "Number of students enrolled in the Victorian Certificate of Applied Learning (VCAL) at Intermediate level (2024 only)": "Number of students enrolled in VCAL",
+            "Percentage of VCE students applying for tertiary places through the Victorian Tertiary Admissions Centre (VTAC)": "Percentage of VCE students applying for tertiary places",
+            "Percentage of satisfactory VCE completions": "Percentage of satisfactory VCE completions",
+            "Number of students awarded the VCE (Baccalaureate)": "Number of students awarded the VCE (Baccalaureate)",
+            "Percentage of Vocational Education and Training (VET) units of competency completed": "Percentage of VET units of competency completed",
+            "Percentage of Victorian Certificate of Applied Learning (VCAL) units completed (2024 only)": "Percentage of VCAL units completed",
+            "Median VCE study score": "Median VCE study score",
+            "Percentage of study scores of 40 and over": "Percentage of study scores of 40 and over",
+            "year": "year",
+        },
+        inplace=True,
+    )
+
+    results_2024["Number of students enrolled in VCAL"] = None
+    results_2024["Percentage of VCAL units completed"] = None
+    results_2024["Adult School"] = None
+    results_2024 = results_2024[STANDARDISED_COLUMN_NAMES]
+
     all_results = pd.concat(
         results2014_2017
         + [
@@ -125,6 +160,7 @@ def get_results() -> pd.DataFrame:
             results_2021,
             results_2022,
             results_2023,
+            results_2024,
         ]
     )
 
@@ -145,8 +181,8 @@ def get_results() -> pd.DataFrame:
 
 def get_vic_school_profiles() -> pd.DataFrame:
     # School Profile information
-    xls = pd.ExcelFile("raw_data/school-profile-2008-2022.xlsx")
-    school_profile_df = pd.read_excel(xls, "SchoolProfile 2008-2022")
+    xls = pd.ExcelFile("raw_data/school-profile-2008-2023.xlsx")
+    school_profile_df = pd.read_excel(xls, "SchoolProfile 2008-2023")
 
     # Filter School Profile data to Vic Only for this analysis
     # And get rid of most of the columns as they're not needed
@@ -171,8 +207,8 @@ def get_vic_school_profiles() -> pd.DataFrame:
 
 def get_vic_school_locations() -> pd.DataFrame:
     # School Location Information
-    xls = pd.ExcelFile("raw_data/school-location-2008-2022.xlsx")
-    school_locations_df = pd.read_excel(xls, "SchoolLocations 2008-2022")
+    xls = pd.ExcelFile("raw_data/school-location-2008-2023.xlsx")
+    school_locations_df = pd.read_excel(xls, "SchoolLocations 2008-2023")
 
     # Filter School Profile data to Vic Only for this analysis
     # And get rid of most of the columns as they're not needed
