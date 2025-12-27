@@ -244,7 +244,7 @@ schools_map_tab = html.Div(
                                 sorted(
                                     analysis_df["year"].unique().tolist(), reverse=True
                                 )[1:],
-                                value=2022,
+                                value=2024,
                                 id="result-year-no-2023",
                             ),
                         ],

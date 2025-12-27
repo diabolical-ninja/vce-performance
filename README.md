@@ -19,8 +19,8 @@ Some notes;
 - I think data for 2012 & 2013 should also exist. I can't find it but would love to add it in. Hit the repo up with a PR if you can find it
 
 You'll also need school profile & school location data from ACARA:
-
-- https://acara.edu.au/docs/default-source/default-document-library/school-profile-2008-2022.xlsx?sfvrsn=d40e4c07_0
+- https://acara.edu.au/contact-us/acara-data-access
+- https://dataandreporting.blob.core.windows.net/anrdataportal/Data-Access-Program/School%20Profile%202008-2024.xlsx
 - https://acara.edu.au/docs/default-source/default-document-library/school-location-2008-2022.xlsx?sfvrsn=fc4e4c07_0
 
 ### Building an Analytical Dataset
