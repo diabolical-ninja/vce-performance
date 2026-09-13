@@ -1,0 +1,79 @@
+import type { SchoolRow } from "@/lib/contract";
+import { measures } from "@/lib/measures";
+import type { Measure, Selection } from "@/types/data";
+
+export const seriesStyles = [
+  { color: "#2864D7", dash: "" },
+  { color: "#258393", dash: "8 4" },
+  { color: "#8765BD", dash: "2 4" },
+  { color: "#BB7629", dash: "10 3 2 3" },
+];
+export const plot = {
+  width: 900,
+  height: 310,
+  left: 65,
+  right: 25,
+  top: 25,
+  bottom: 45,
+};
+interface ChartPoint {
+  year: number;
+  value: number | null;
+  x: number;
+  y: number;
+}
+export function chartDomain(
+  rows: SchoolRow[],
+  measure: Measure,
+  full: boolean,
+): [number, number] {
+  const values = rows.flatMap((row): number[] =>
+    row[measure] === null ? [] : [row[measure]],
+  );
+  if (!values.length) return [0, measures[measure].max ?? 1];
+  const padding = 2;
+  const minimum = full ? 0 : Math.max(0, Math.min(...values) - padding);
+  const maximum = full
+    ? (measures[measure].max ?? Math.max(...values) + padding)
+    : Math.max(...values) + padding;
+  return [minimum, maximum];
+}
+export function chartPoints(
+  school: Selection,
+  rows: SchoolRow[],
+  years: number[],
+  measure: Measure,
+  domain: [number, number],
+): ChartPoint[] {
+  const [minimum, maximum] = domain;
+  const width = plot.width - plot.left - plot.right,
+    height = plot.height - plot.top - plot.bottom;
+  return years.map((year, index): ChartPoint => {
+    const row = rows.find(
+      (entry): boolean => entry.id === school.id && entry.year === year,
+    );
+    const value = row?.[measure] ?? null;
+    return {
+      year,
+      value,
+      x: plot.left + (index / Math.max(1, years.length - 1)) * width,
+      y:
+        plot.top +
+        ((maximum - (value ?? minimum)) / (maximum - minimum)) * height,
+    };
+  });
+}
+export function linePath(points: ChartPoint[]): string {
+  let connected = false;
+  return points
+    .map((point): string => {
+      if (point.value === null) {
+        connected = false;
+        return "";
+      }
+      const command = connected ? "L" : "M";
+      connected = true;
+      return `${command}${point.x},${point.y}`;
+    })
+    .join(" ");
+}

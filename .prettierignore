@@ -1,0 +1,12 @@
+node_modules
+.next
+coverage
+playwright-report
+test-results
+/data
+.mypy_cache
+.github/workflows/opencode.yml
+raw_data
+docs/design
+poetry.lock
+next-env.d.ts
