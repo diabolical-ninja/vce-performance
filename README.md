@@ -60,3 +60,8 @@ poetry run python app.py
 ```
 
 In a browser, navigate to `http://127.0.0.1:8050/`
+
+## Redesign proposal
+
+The [approved design proposal and interactive mockup](docs/design/README.md) capture the direction for a future Next.js version, including automatic rankings and a searchable school picker. The current Dash application remains the running implementation.
+
