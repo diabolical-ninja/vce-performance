@@ -6,8 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "VCE performance · Victorian school results",
-    template: "%s · VCE performance",
+    default: "VCE Compare · Victorian school results",
+    template: "%s · VCE Compare",
   },
   description:
     "Explore published Victorian VCE results, compare annual school trends and understand the data.",
