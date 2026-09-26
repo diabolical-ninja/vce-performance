@@ -56,11 +56,16 @@ GA4 collects page URLs (including this site's filter/search query parameters) an
 ## Validation
 
 ```sh
-npx playwright install chromium
 npm run validate
+npx playwright install chromium
+npm run validate:full
 ```
 
-Validation includes Python row-by-row reconciliation, 100% Vitest unit/component coverage, strict TypeScript, desktop/mobile Playwright, axe accessibility checks, zero-warning lint, formatting, dead code, duplication, architecture, component complexity and production build. See [engineering standards](specs/technical-specifications.md). The Husky pre-commit hook and GitHub Actions run the same command.
+`validate` is the local/pre-commit gate: Python export and row-by-row reconciliation, 100% Vitest unit/component coverage, strict TypeScript, zero-warning lint, formatting, dead code, duplication, architecture and component complexity. Independent checks run with at most three concurrent processes; Vitest uses at most two workers. ESLint, Prettier and TypeScript reuse caches on repeat runs. Each stage and the total are timed. A failure stops new checks from starting while active checks finish reporting.
+
+`validate:full` is the required CI/release gate. It adds the production build (including TypeScript checking), desktop/mobile browser journeys, axe accessibility checks and an HTTP crawl of all 744 profiles. The viewport-independent crawl runs once; the browser journeys run on both viewports against production. The export runs once per gate, and the full gate uses the build's TypeScript check rather than checking twice. GitHub Actions runs the full gate; Husky runs the local gate. Use `npm run e2e` for development-server diagnostics and `npm run e2e:production` against an existing build.
+
+The local target is under 10 seconds on warm runs, not a guaranteed cold-build budget. Server requests reuse the validated dataset until the exported file's modification time, change time or size changes.
 
 ## Coverage and interpretation
 

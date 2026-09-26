@@ -2,12 +2,21 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,
+  workers: 2,
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    {
+      name: "chromium",
+      testIgnore: "profiles.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile",
+      testIgnore: "profiles.spec.ts",
+      use: { ...devices["Pixel 7"] },
+    },
+    { name: "profiles", testMatch: "profiles.spec.ts" },
   ],
   webServer: {
     command:

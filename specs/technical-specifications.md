@@ -25,7 +25,7 @@ Comparisons support 12 schools, Tableau-based categorical colours, point tooltip
 
 ## Quality gates
 
-`npm run validate` executes Python export and reconciliation tests, Vitest with 100% coverage, TypeScript, desktop/mobile Playwright, ESLint with zero warnings, Prettier, Knip, jscpd, Dependency Cruiser, component complexity checks and production build. The Husky pre-commit hook and CI invoke the same command. Do not skip tests, lower thresholds, exclude application files or narrow collection to pass checks.
+`npm run validate` is the local/pre-commit gate: Python export and reconciliation tests, Vitest with 100% coverage, TypeScript, ESLint with zero warnings, Prettier, Knip, jscpd, Dependency Cruiser and component complexity checks. Independent checks run with bounded concurrency and report timings. `npm run validate:full` is the required CI/release gate; it adds the production build (which performs the TypeScript check), desktop/mobile Playwright and axe accessibility checks. The HTTP-only exhaustive profile crawl runs once against production. The export runs once per gate. Do not skip tests, lower thresholds, exclude application files or narrow collection to pass checks.
 
 ESLint enforces the reference project's limits: complexity 10, nesting 3, 300 source lines/file, 120 lines/function, 5 parameters, cognitive complexity 10 and no unexplained magic numbers. SonarJS catches common code smells. Component limits are 200 file lines, 10 imports, JSX depth 6, 8 destructured props, 5 state hooks and 3 effects.
 

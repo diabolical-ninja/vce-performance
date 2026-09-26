@@ -10,3 +10,4 @@ raw_data
 docs/design
 poetry.lock
 next-env.d.ts
+.eslintcache
