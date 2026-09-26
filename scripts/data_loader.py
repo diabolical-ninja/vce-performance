@@ -1,9 +1,14 @@
 """Loads & Returns All Available Result Years."""
 
 import difflib
+from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+RAW_DATA = ROOT / "raw_data"
+OUTPUT = ROOT / "vce_school_results_analysis_dataset.csv"
 
 STANDARDISED_COLUMN_NAMES = [
     "School",
@@ -35,7 +40,7 @@ def get_results() -> pd.DataFrame:
     Returns:
         pd.DataFrame: Joined DF of annual school results from 2014 to 2023
     """
-    xls = pd.ExcelFile("raw_data/postcompletiondata-schools-2014-2017.xlsx")
+    xls = pd.ExcelFile(RAW_DATA / "postcompletiondata-schools-2014-2017.xlsx")
     results2014_2017 = []
     for sheet in xls.sheet_names:
         tmp = pd.read_excel(xls, sheet)
@@ -44,7 +49,7 @@ def get_results() -> pd.DataFrame:
         results2014_2017.append(tmp)
 
     results_2018 = pd.read_excel(
-        "raw_data/2018_Senior_Secondary_Completion_and_Achievement_Information.xlsx",
+        RAW_DATA / "2018_Senior_Secondary_Completion_and_Achievement_Information.xlsx",
         skiprows=range(1, 8),
         header=1,
     )
@@ -52,7 +57,7 @@ def get_results() -> pd.DataFrame:
     results_2018.columns = STANDARDISED_COLUMN_NAMES
 
     results_2019 = pd.read_excel(
-        "raw_data/2019SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2019SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 8),
         header=1,
     )
@@ -60,7 +65,7 @@ def get_results() -> pd.DataFrame:
     results_2019.columns = STANDARDISED_COLUMN_NAMES
 
     results_2020 = pd.read_excel(
-        "raw_data/2020SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2020SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 8),
         header=1,
     )
@@ -69,7 +74,7 @@ def get_results() -> pd.DataFrame:
     results_2020.columns = STANDARDISED_COLUMN_NAMES
 
     results_2021 = pd.read_excel(
-        "raw_data/2021SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2021SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 10),
         header=1,
     )
@@ -77,7 +82,7 @@ def get_results() -> pd.DataFrame:
     results_2021.columns = STANDARDISED_COLUMN_NAMES
 
     results_2022 = pd.read_excel(
-        "raw_data/2022SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2022SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 8),
         header=1,
     )
@@ -85,7 +90,7 @@ def get_results() -> pd.DataFrame:
     results_2022.columns = STANDARDISED_COLUMN_NAMES
 
     results_2023 = pd.read_excel(
-        "raw_data/2023SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2023SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 10),
         header=1,
     )
@@ -117,7 +122,7 @@ def get_results() -> pd.DataFrame:
     results_2023 = results_2023[STANDARDISED_COLUMN_NAMES]
 
     results_2024 = pd.read_excel(
-        "raw_data/2024SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2024SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 10),
         header=1,
     )
@@ -152,7 +157,7 @@ def get_results() -> pd.DataFrame:
     results_2024 = results_2024[STANDARDISED_COLUMN_NAMES]
 
     results_2025 = pd.read_excel(
-        "raw_data/2025-SeniorSecondaryCompletionandAchievementInformation.xlsx",
+        RAW_DATA / "2025-SeniorSecondaryCompletionandAchievementInformation.xlsx",
         skiprows=range(1, 11),
         header=1,
     )
@@ -217,7 +222,7 @@ def get_results() -> pd.DataFrame:
 
 def get_vic_school_profiles() -> pd.DataFrame:
     # School Profile information
-    xls = pd.ExcelFile("raw_data/School Profile 2008-2024.xlsx")
+    xls = pd.ExcelFile(RAW_DATA / "School Profile 2008-2024.xlsx")
     school_profile_df = pd.read_excel(xls, "SchoolProfile 2008-2024")
 
     # Filter School Profile data to Vic Only for this analysis
@@ -243,12 +248,12 @@ def get_vic_school_profiles() -> pd.DataFrame:
 
 def get_vic_school_locations() -> pd.DataFrame:
     # School Location Information
-    xls_2008_2023 = pd.ExcelFile("raw_data/school-location-2008-2023.xlsx")
+    xls_2008_2023 = pd.ExcelFile(RAW_DATA / "school-location-2008-2023.xlsx")
     school_locations_df_2008_2023 = pd.read_excel(
         xls_2008_2023, "SchoolLocations 2008-2023"
     )
 
-    xls_2024 = pd.ExcelFile("raw_data/School Location 2024.xlsx")
+    xls_2024 = pd.ExcelFile(RAW_DATA / "School Location 2024.xlsx")
     school_locations_df_2024 = pd.read_excel(xls_2024, "SchoolLocations 2024")
 
     school_locations_df = pd.concat(
@@ -293,7 +298,7 @@ def create_analysis_dataset(save: bool = True):
 
     # Append school information to results data
     print("Joining school profile data to VCE results")
-    joining_table = pd.read_csv("raw_data/school_name_joining_keys.csv")
+    joining_table = pd.read_csv(RAW_DATA / "school_name_joining_keys.csv")
 
     results_df = pd.merge(
         results_df, joining_table, left_on="School", right_on="vce_school_name"
@@ -335,7 +340,7 @@ def create_analysis_dataset(save: bool = True):
 
     if save:
         print("Writing CSV...")
-        analysis_df.to_csv("vce_school_results_analysis_dataset.csv", index=False)
+        analysis_df.to_csv(OUTPUT, index=False)
     else:
         return analysis_df
 
