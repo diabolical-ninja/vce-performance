@@ -33,7 +33,7 @@ export function Brand(): ReactElement {
       href="/"
       className="text-xl font-medium tracking-tight text-heading hover:no-underline"
     >
-      <strong>VCE</strong> performance
+      <strong>VCE</strong> Compare
     </CarryLink>
   );
 }

@@ -1,4 +1,4 @@
-# VCE School Performance
+# VCE Compare
 
 Explore published Victorian school results with Next.js App Router, Tailwind CSS and shadcn-style components. The [approved design](docs/design/README.md) is implemented across:
 
