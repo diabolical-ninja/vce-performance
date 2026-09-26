@@ -20,7 +20,7 @@ export default defineConfig({
     maxWorkers: 2,
     globals: true,
     include: ["src/**/*.test.{ts,tsx}"],
-    setupFiles: ["./vitest.setup.ts"],
+    setupFiles: ["./config/vitest.setup.ts"],
     testTimeout: 30000,
   },
 });

@@ -1,7 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "node:path";
 
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: "../e2e",
+  outputDir: "../test-results",
   fullyParallel: true,
   workers: 2,
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
@@ -19,6 +21,7 @@ export default defineConfig({
     { name: "profiles", testMatch: "profiles.spec.ts" },
   ],
   webServer: {
+    cwd: path.resolve(__dirname, ".."),
     command:
       process.env.TEST_PRODUCTION === "1"
         ? "npm start -- --port 3100"
