@@ -29,6 +29,30 @@ npm start
 
 Run these commands from the repository root; deploy the generated `data/website.json` and analytical CSV alongside the Node application. The generated JSON is validated on the server and is not committed.
 
+## Google Analytics (GA4)
+
+The site loads Google Analytics after hydration when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set to a valid `G-...` ID. With no ID configured, no Analytics scripts load. The Measurement ID is public, not a secret. Leave it unset in development and preview deployments to avoid polluting production reports.
+
+### Production configuration
+
+- Property: **VCE Compare** (`555976157`), with Australia/Melbourne reporting time zone and AUD currency.
+- Web stream: **VCE Compare website**, for `https://vcecompare.com`.
+- Vercel project: `vce-performance`, with the following variable configured for **Production**:
+
+```sh
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-WMG9GHSSVW
+```
+
+Rebuild and redeploy after changing the variable: Next.js embeds public environment values at build time. For local verification, put the variable in `.env.local` and restart the development server; remove it after testing.
+
+### Page views and verification
+
+In the Google Analytics web stream's **Enhanced measurement** settings, ensure **Page views → Advanced settings → Page changes based on browser history events** is enabled. This tracks Next.js client-side navigation as well as initial page loads; do not add a second manual page-view tracker.
+
+Open the deployed site with content blockers disabled, then check **Reports → Realtime** in [Google Analytics](https://analytics.google.com/). Visit Rankings, Schools and Compare using the site navigation and confirm page views appear. Google Tag Assistant can inspect individual events and confirm each navigation produces one page view. Standard reports can take 24–48 hours to populate.
+
+GA4 collects page URLs (including this site's filter/search query parameters) and uses cookies. Describe this in the site's published privacy information, and configure consent handling before enabling collection where required for your audience.
+
 ## Validation
 
 ```sh

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactElement, type ReactNode } from "react";
 import { Brand, CarryLink, Navigation } from "@/components/navigation";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <GoogleAnalytics />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-4"
