@@ -16,4 +16,5 @@ test-results/
 data/website.json
 .DS_Store
 .mypy_cache/
+.vercel
 .eslintcache
