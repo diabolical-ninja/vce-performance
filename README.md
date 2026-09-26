@@ -55,6 +55,11 @@ GA4 collects page URLs (including this site's filter/search query parameters) an
 
 ## Validation
 
+Tooling configuration for Vitest (including test setup), Playwright, Tailwind,
+Knip and Dependency Cruiser lives in `config/`. Run the npm scripts from the
+repository root; they select the relocated configs. Framework, editor and
+project-discovery files remain at the root.
+
 ```sh
 npm run validate
 npx playwright install chromium
