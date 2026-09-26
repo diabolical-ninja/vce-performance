@@ -8,7 +8,7 @@ Explore published Victorian school results with Next.js App Router, Tailwind CSS
 - A school results map with blue-to-red values, working map/list modes, suburb zoom and an automatically synchronized viewport list, including tile-failure fallback.
 - Data definitions, provenance, downloads and correction guidance.
 
-**The ETL remains Python.** `data_loader.py` still owns spreadsheet normalization and joins. `scripts/export_website.py` publishes its CSV for the website. The deprecated Dash UI is retained in `legacy/dash_app.py`, outside the new runtime.
+**The ETL remains Python.** `scripts/data_loader.py` owns spreadsheet normalization and joins to generate `vce_school_results_analysis_dataset.csv`. `scripts/export_website.py` publishes its CSV for the website. The legacy Plotly Dash app has been removed.
 
 ## Run the website
 
@@ -104,25 +104,14 @@ To create a cleaned dataset for analysis run:
 
 ```sh
 poetry install
-poetry run python data_loader.py
+poetry run python scripts/data_loader.py
 npm run data:export
 ```
 
-This merges all years into one, drops a bunch of columns that aren't of interest and merges the VCE results with the school profiles information. It will produce a file called `vce_school_results_analysis_dataset.csv`.
+This merges all years into one, drops a bunch of columns that aren't of interest and merges the VCE results with the school profiles information. It will produce `vce_school_results_analysis_dataset.csv` in the repository root. The loader resolves all input and output paths relative to the repository root, independent of the working directory.
 
 ### Notes on the Data
 
 Of course, OF COURSE, the Victorian and federal governments (ACARA) don't name schools the same thing. As such a lookup table has been manually created to map the Victorian school name to the ACARA name. This is required to join the VCE results to information such as the school location, school's ICSEA, etc.
 
 This is by no means perfect so if you find errors please raise an issue or better yet raise a PR with the proposed fix.
-
-## Deprecated Dash reference
-
-The old UI is no longer the website entry point. To inspect it for migration reference, install its optional dependencies:
-
-```bash
-poetry install --with legacy
-poetry run python legacy/dash_app.py
-```
-
-It runs on http://127.0.0.1:8050 and still requires its original `MAPBOX_TOKEN` for maps. The new Next.js website does not use that token or any Dash/Plotly dependencies.
