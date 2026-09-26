@@ -1,4 +1,8 @@
-"""Main dash app to display VCE result info."""
+"""Deprecated Dash UI, retained only as a migration reference.
+
+The supported website is now Next.js (npm run dev). Run this historical UI from
+the repository root with: poetry run python legacy/dash_app.py
+"""
 
 import os
 

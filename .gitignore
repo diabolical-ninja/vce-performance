@@ -5,3 +5,14 @@ __pycache__/
 
 
 .mapbox_token
+.env*
+!.env.example
+node_modules/
+.next/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+data/website.json
+.DS_Store
+.mypy_cache/
