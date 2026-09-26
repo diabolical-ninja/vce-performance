@@ -35,7 +35,7 @@ server = app.server
 navbar = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("Historical VCE Compare", href="#"),
+            dbc.NavbarBrand("Historical VCE Performance", href="#"),
             dbc.Nav(
                 [
                     dbc.NavItem(

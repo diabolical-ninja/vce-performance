@@ -1,4 +1,4 @@
-# VCE Compare: approved redesign
+# VCE performance: approved redesign
 
 Design proposal for a future Next.js version. Recorded 13 September 2026.
 
@@ -34,7 +34,7 @@ The example selection is illustrative. It is not a recommendation that those sch
 
 ### Navigation and first visit
 
-Use a compact white header with the text wordmark **VCE Compare** and five destinations: **Rankings · Schools · Compare · Map · About the data**. Keep the primary content in a centred, generous-width column. A sidebar is unnecessary for this navigation.
+Use a compact white header with the text wordmark **VCE performance** and five destinations: **Rankings · Schools · Compare · Map · About the data**. Keep the primary content in a centred, generous-width column. A sidebar is unnecessary for this navigation.
 
 Rankings answers the broad discovery question immediately. Schools supports finding a particular school. Profiles, comparisons and the map should feel like connected views of the same data. Put source-code and methodology links in the footer and About the data.
 
