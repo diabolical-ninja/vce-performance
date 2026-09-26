@@ -3,7 +3,7 @@ import { PageHeading } from "@/components/page-heading";
 import { Filters } from "@/components/filters";
 import { CoverageNote } from "@/components/coverage-note";
 import { RankingsTable } from "@/components/rankings-table";
-import { SearchForm } from "@/components/search-form";
+import { ALL_YEARS, DEFAULT_ENROLMENTS, yearLabel } from "@/lib/query";
 import { pageData } from "@/lib/data";
 import { filterRows, ranked } from "@/lib/schools";
 import { measures } from "@/lib/measures";
@@ -14,11 +14,16 @@ export default async function RankingsPage({
 }: {
   searchParams: Promise<Params>;
 }): Promise<React.ReactElement> {
-  const { rows, years, state } = await pageData(searchParams);
+  const { rows, years, state } = await pageData(
+    Promise.resolve({ year: "all", ...(await searchParams) }),
+    { allYears: true, minimum: DEFAULT_ENROLMENTS },
+  );
   // Directory searches never restrict the independent ranking universe.
   const annual = filterRows(rows, { ...state, query: "" });
   const context = rows.some(
-    (row): boolean => row.year === state.year && row.profileYear !== null,
+    (row): boolean =>
+      (state.year === ALL_YEARS || row.year === state.year) &&
+      row.profileYear !== null,
   );
   const entries = ranked(annual, state),
     available = annual.filter(
@@ -32,23 +37,10 @@ export default async function RankingsPage({
       />
       <Filters state={state} years={years} context={context} />
       <CoverageNote year={state.year} context={context} />
-      <details className="mb-6">
-        <summary>Enrolment filter</summary>
-        <SearchForm
-          label="Minimum total school enrolments"
-          name="minimum"
-          value={String(state.minimum)}
-          disabled={!context}
-        />
-        <p className="text-xs text-muted">
-          Uses whole-school enrolments, not the VCE cohort. Unknown enrolments
-          cannot meet a positive minimum.
-        </p>
-      </details>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <h2>Top {state.top} schools</h2>
         <p className="text-xs text-muted">
-          {available} source records ranked · {state.year} ·{" "}
+          {available} source records ranked · {yearLabel(state.year)} ·{" "}
           {measures[state.measure].label}
         </p>
       </div>

@@ -11,7 +11,7 @@ import { SelectionBar } from "@/components/selection-bar";
 import { SelectedSchools } from "@/components/selected-schools";
 import { ComparisonChart } from "@/components/comparison-chart";
 import { CompareContent } from "@/components/compare-content";
-import { ResultsSnapshot } from "@/components/results-snapshot";
+import { ChartObservation } from "@/components/chart-observation";
 import { ProfileSummary } from "@/components/profile-summary";
 import { RankingsTable } from "@/components/rankings-table";
 import { DataValue } from "@/components/data-value";
@@ -20,7 +20,7 @@ import { readFilters } from "@/lib/query";
 import { directory } from "@/lib/schools";
 
 const base = getRows()[0];
-const schools = directory(getRows()).slice(0, 6);
+const schools = directory(getRows()).slice(0, 14);
 function navigate(url: string): void {
   act((): void => {
     window.history.pushState({}, "", url);
@@ -70,6 +70,11 @@ it("exposes all filter modes and retains URL state on changes", (): void => {
   ])
     fireEvent.change(screen.getByLabelText(label), { target: { value } });
   expect(window.location.search).toContain("top=10");
+  fireEvent.change(screen.getByLabelText("Minimum total school enrolments"), {
+    target: { value: "50" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply filter" }));
+  expect(window.location.search).toContain("minimum=50");
   rerender(
     <Filters
       state={state}
@@ -126,13 +131,13 @@ it("adds, removes and caps persistent selections from directory and profile cont
   );
   fireEvent.click(screen.getByRole("button"));
   expect(window.location.search).toBe("");
-  navigate("/?schools=c,d,e,f");
+  navigate("/?schools=c,d,e,f,g,h,i,j,k,l,m,n");
   expect(screen.getByRole("button")).toBeDisabled();
   expect(screen.getByRole("checkbox")).toBeDisabled();
-  navigate("/?schools=a,c,d,e");
+  navigate("/?schools=a,c,d,e,f,g,h,i,j,k,l,m");
   expect(screen.getByRole("checkbox")).toBeEnabled();
   fireEvent.click(screen.getByRole("checkbox"));
-  expect(screen.getByRole("status")).toHaveTextContent("3 of 4");
+  expect(screen.getByRole("status")).toHaveTextContent("11 of 12");
 });
 it("operates the full picker by keyboard, pointer, outside focus, empty search and limit state", async (): Promise<void> => {
   const user = userEvent.setup();
@@ -144,7 +149,7 @@ it("operates the full picker by keyboard, pointer, outside focus, empty search a
   );
   const input = screen.getByRole("combobox");
   await user.click(input);
-  expect(screen.getAllByRole("option")).toHaveLength(6);
+  expect(screen.getAllByRole("option")).toHaveLength(14);
   await user.keyboard("{ArrowDown}{ArrowUp}{Escape}");
   expect(input).toHaveAttribute("aria-expanded", "false");
   await user.keyboard("{ArrowDown}{Enter}");
@@ -153,7 +158,7 @@ it("operates the full picker by keyboard, pointer, outside focus, empty search a
   await user.click(
     screen.getByRole("button", { name: "Show school suggestions" }),
   );
-  expect(screen.getAllByRole("option")).toHaveLength(5);
+  expect(screen.getAllByRole("option")).toHaveLength(13);
   await user.type(input, "zzzzzz");
   expect(screen.getByText(/No matching schools/)).toBeVisible();
   await user.keyboard("{ArrowDown}{Enter}{Escape}");
@@ -173,12 +178,14 @@ it("operates the full picker by keyboard, pointer, outside focus, empty search a
   expect(input).toHaveAttribute("aria-expanded", "false");
   navigate(
     `/?schools=${schools
-      .slice(0, 4)
+      .slice(0, 12)
       .map((s): string => s.id)
       .join(",")}`,
   );
   expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
-  expect(screen.getByText(/Four-school comparison limit/)).toBeVisible();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    /12-school comparison limit/,
+  );
 });
 it("removes chips and reopens comparison capacity", (): void => {
   navigate(`/?schools=${schools[0].id}`);
@@ -198,10 +205,14 @@ it("makes annual charts, gaps, exact tables and scale toggles accessible", (): v
       measure="median"
     />,
   );
-  expect(screen.getByRole("img")).toBeVisible();
+  expect(screen.getByRole("group", { name: /Annual/ })).toBeVisible();
   expect(screen.getByText(/Focused scale/)).toBeVisible();
   fireEvent.click(screen.getByLabelText("Show full scale"));
   expect(window.location.search).toContain("scale=full");
+  expect(screen.getByRole("table")).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Hide annual data table" }),
+  );
   fireEvent.click(
     screen.getByRole("button", { name: "View annual data table" }),
   );
@@ -209,37 +220,15 @@ it("makes annual charts, gaps, exact tables and scale toggles accessible", (): v
   expect(screen.getAllByLabelText("Unavailable in this dataset")).toHaveLength(
     2,
   );
-  fireEvent.click(screen.getByRole("button", { name: "View trend chart" }));
+  expect(screen.getByRole("group", { name: /Annual/ })).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Hide annual data table" }),
+  );
   fireEvent.click(screen.getByLabelText("Show full scale"));
   expect(window.location.search).toContain("scale=focused");
 });
-it("renders honest snapshots for gains, falls, missing years and context", (): void => {
-  const fixtures = [
-    base,
-    { ...base, year: 2015, median: 35 },
-    { ...base, id: "second", year: 2014, median: 39 },
-    { ...base, id: "second", year: 2015, median: 30 },
-  ];
-  const { rerender } = render(
-    <ResultsSnapshot
-      schools={[base, { ...base, id: "second" }, { ...base, id: "missing" }]}
-      rows={fixtures}
-      year={2015}
-      measure="median"
-    />,
-  );
-  expect(screen.getByText("+3.0 study score points")).toBeVisible();
-  expect(screen.getByText("-9.0 study score points")).toBeVisible();
-  rerender(
-    <ResultsSnapshot
-      schools={[base]}
-      rows={[{ ...base, year: 2015 }]}
-      year={2015}
-      measure="median"
-    />,
-  );
-  expect(screen.getByLabelText("Unavailable in this dataset")).toBeVisible();
-  rerender(<ProfileSummary row={base} />);
+it("renders separately dated school context aligned beneath its headings", (): void => {
+  const { rerender } = render(<ProfileSummary row={base} />);
   expect(screen.getByText(/^ACARA school profile/)).toHaveTextContent("2014");
   rerender(<ProfileSummary row={{ ...base, profileYear: null }} />);
   expect(screen.getByText(/No 2014 profile/)).toBeVisible();
@@ -271,6 +260,16 @@ it("renders ranking measures, full-range bars and unavailable values", (): void 
     />,
   );
   expect(screen.queryByText("50")).not.toBeInTheDocument();
+  rerender(
+    <RankingsTable
+      entries={[{ row: { ...base, profileYear: null }, rank: 1 }]}
+      measure="median"
+      year={2025}
+    />,
+  );
+  expect(
+    screen.getByText("No same-year school profile is available."),
+  ).toBeInTheDocument();
   rerender(<DataValue value={null} measure="median" />);
   expect(screen.getByLabelText("Unavailable in this dataset")).toBeVisible();
 });
@@ -294,5 +293,35 @@ it("provides an empty comparison and selected-school histories without shipping 
       state={{ ...state, selected: [base.id, "bad"] }}
     />,
   );
-  expect(within(screen.getByRole("table")).getByText(base.name)).toBeVisible();
+  expect(screen.queryByLabelText("Results year")).not.toBeInTheDocument();
+  expect(screen.queryByText("Results at a glance")).not.toBeInTheDocument();
+  expect(within(screen.getByRole("table")).getByText(/Academy/)).toBeVisible();
+});
+it("shows graph tooltips on hover, focus and touch, and dismisses with Escape", (): void => {
+  render(
+    <svg>
+      <ChartObservation
+        x={10}
+        y={20}
+        color="#4e79a7"
+        label="Academy · 2024 · Median study score: 32"
+      />
+    </svg>,
+  );
+  const point = screen.getByRole("button");
+  fireEvent.pointerEnter(point);
+  expect(screen.getByRole("tooltip")).toHaveTextContent(
+    "Median study score: 32",
+  );
+  fireEvent.pointerLeave(point);
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  fireEvent.focus(point);
+  fireEvent.keyDown(point, { key: "Tab" });
+  expect(screen.getByRole("tooltip")).toBeVisible();
+  fireEvent.keyDown(point, { key: "Escape" });
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  fireEvent.click(point);
+  expect(screen.getByRole("tooltip")).toBeVisible();
+  fireEvent.blur(point);
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 });

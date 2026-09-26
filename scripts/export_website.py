@@ -8,9 +8,12 @@ import csv
 import hashlib
 import json
 import math
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.all_years import summarize
 SOURCE = ROOT / "vce_school_results_analysis_dataset.csv"
 TARGET = ROOT / "data" / "website.json"
 MEASURES = {
@@ -66,9 +69,10 @@ def export(source: Path = SOURCE, target: Path = TARGET) -> dict:
     if len(set(identities)) != len(identities):
         raise ValueError("Duplicate identity/year: review source rows before publishing")
     payload = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "sourceSha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "rows": rows,
+        "allYears": summarize(rows, MEASURES),
     }
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(payload, ensure_ascii=False, allow_nan=False, separators=(",", ":")) + "\n", encoding="utf-8")

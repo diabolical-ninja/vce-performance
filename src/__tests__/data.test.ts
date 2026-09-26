@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getDataset, getRows, pageData } from "@/lib/data";
 import { datasetSchema, type SchoolRow } from "@/lib/contract";
 import { formatValue, measureKeys } from "@/lib/measures";
-import { readFilters, scalar, hrefWith } from "@/lib/query";
+import { ALL_YEARS, readFilters, scalar, hrefWith } from "@/lib/query";
 import {
   directory,
   filterRows,
@@ -12,7 +12,15 @@ import {
   matchesSchool,
 } from "@/lib/schools";
 import { chartDomain, chartPoints, linePath } from "@/lib/chart";
-import { located, inside, mapRange, pointColor, victoria } from "@/lib/map";
+import {
+  located,
+  inside,
+  mapRange,
+  pointColor,
+  victoria,
+  searchBounds,
+  mapLabel,
+} from "@/lib/map";
 import { nextOption } from "@/lib/picker";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +93,7 @@ describe("URL and data queries", (): void => {
       year: 2024,
       measure: "high",
       top: 10,
-      selected: ["a", "b", "c", "d"],
+      selected: ["a", "b", "c", "d", "e"],
       minimum: 0,
     });
     expect(scalar(undefined)).toBe("");
@@ -224,9 +232,9 @@ describe("visualization math", (): void => {
     ]);
     expect(mapRange([], "median")).toEqual([0, 1]);
     expect(pointColor(null, [0, 50])).toBe("#6b7280");
-    expect(pointColor(0, [0, 50])).toContain("70%");
-    expect(pointColor(50, [0, 50])).toContain("30%");
-    expect(pointColor(10, [10, 10])).toContain("70%");
+    expect(pointColor(0, [0, 50])).toBe("rgb(78, 134, 212)");
+    expect(pointColor(50, [0, 50])).toBe("rgb(200, 45, 55)");
+    expect(pointColor(10, [10, 10])).toBe("rgb(78, 134, 212)");
   });
   it("wraps picker navigation and merges Tailwind classes", (): void => {
     expect(nextOption(0, 2, "ArrowUp", true)).toBe(1);
@@ -235,4 +243,41 @@ describe("visualization math", (): void => {
     expect(nextOption(0, 0, "ArrowDown", true)).toBe(0);
     expect(cn("p-2", false, "p-4")).toBe("p-4");
   });
+});
+it("loads Python all-year summaries with per-measure coverage and ignores All on single-year screens", async (): Promise<void> => {
+  const data = await pageData(Promise.resolve({ year: "all" }), {
+    allYears: true,
+    minimum: 50,
+  });
+  expect(data.rows).toHaveLength(744);
+  expect(data.state).toMatchObject({ year: ALL_YEARS, minimum: 50 });
+  const aggregate = data.rows.find((row): boolean => row.id === base.id)!;
+  expect(aggregate.aggregation?.counts.median).toBe(12);
+  expect(mapLabel(aggregate, "median")).toContain(
+    "Mean over 12 available years",
+  );
+  expect(mapLabel({ ...base, profileYear: null }, "median")).toContain(
+    "profile unavailable",
+  );
+  expect(readFilters({ year: "all" }, [2025]).year).toBe(2025);
+  expect(
+    readFilters({ year: "2024" }, [2025, 2024], { allYears: true }).year,
+  ).toBe(2024);
+});
+it("finds suburb bounds without filtering neighbouring visible schools", (): void => {
+  const fixtures = located([
+    base,
+    {
+      ...base,
+      id: "nearby",
+      name: "Neighbouring school",
+      locality: "Neighbour",
+      lat: base.lat! + 0.002,
+    },
+  ]);
+  const bounds = searchBounds(fixtures, "fitzroy")!;
+  expect(inside(fixtures[1], bounds)).toBe(true);
+  expect(searchBounds(fixtures, "Academy")).toEqual(bounds);
+  expect(searchBounds(fixtures, "missing")).toBeNull();
+  expect(searchBounds(fixtures, "  ")).toBeNull();
 });

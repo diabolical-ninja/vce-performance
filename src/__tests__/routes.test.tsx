@@ -78,7 +78,7 @@ it("composes comparison routes with and without selected records", async (): Pro
       searchParams: Promise.resolve({ schools: school.id }),
     }),
   );
-  expect(screen.getByRole("img")).toBeVisible();
+  expect(screen.getByRole("group", { name: /Annual/ })).toBeVisible();
 });
 it("renders valid historical profiles, source dates, unknown IDs and metadata", async (): Promise<void> => {
   expect(
@@ -116,6 +116,9 @@ it("defaults the map to dated coverage and explains missing locations", async ()
   cleanup();
   render(await MapPage({ searchParams: Promise.resolve({ year: "2025" }) }));
   expect(screen.getByText(/No same-year location coverage/)).toBeVisible();
+  cleanup();
+  render(await MapPage({ searchParams: Promise.resolve({ year: "all" }) }));
+  expect(screen.getByLabelText("Results year")).toHaveValue("all");
 });
 it("renders the methodology and serves the exact downloadable analytical CSV", async (): Promise<void> => {
   render(<AboutPage />);

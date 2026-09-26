@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { SchoolPicker } from "@/components/school-picker";
 import { SelectedSchools } from "@/components/selected-schools";
 import { ComparisonChart } from "@/components/comparison-chart";
-import { ResultsSnapshot } from "@/components/results-snapshot";
+import { MAX_SELECTION } from "@/lib/query";
 import { Filters } from "@/components/filters";
 import { CarryLink } from "@/components/navigation";
 import type { SchoolRow } from "@/lib/contract";
@@ -51,17 +51,11 @@ export function CompareContent({
             years={[...years].reverse()}
             measure={state.measure}
           />
-          <ResultsSnapshot
-            schools={selected}
-            rows={history}
-            year={state.year}
-            measure={state.measure}
-          />
         </>
       ) : (
         <div className="notice">
-          Add a school to start comparing. Choose up to four schools from the
-          complete historical directory.
+          Add a school to start comparing. Choose up to {MAX_SELECTION} schools
+          from the complete historical directory.
         </div>
       )}
       <p className="mt-5 text-xs leading-relaxed text-muted">

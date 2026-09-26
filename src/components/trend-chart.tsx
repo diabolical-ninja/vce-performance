@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { ChartObservation } from "@/components/chart-observation";
 import {
   chartDomain,
   chartPoints,
@@ -32,7 +33,7 @@ export function TrendChart({
       aria-label="Scrollable annual trend chart"
     >
       <svg
-        role="img"
+        role="group"
         aria-label={`Annual ${measures[measure].label}. Exact values are available in the annual data table.`}
         viewBox={`0 0 ${plot.width} ${plot.height}`}
         className="w-full min-w-[680px]"
@@ -53,15 +54,13 @@ export function TrendChart({
               {points
                 .filter((point): boolean => point.value !== null)
                 .map((point): ReactElement => (
-                  <circle
+                  <ChartObservation
                     key={point.year}
-                    cx={point.x}
-                    cy={point.y}
-                    r="3"
-                    fill={style.color}
-                  >
-                    <title>{`${school.name} · ${point.year}: ${formatValue(point.value, measure)}`}</title>
-                  </circle>
+                    x={point.x}
+                    y={point.y}
+                    color={style.color}
+                    label={`${school.name} · ${point.year} · ${measures[measure].label}: ${formatValue(point.value, measure)}`}
+                  />
                 ))}
             </g>
           );

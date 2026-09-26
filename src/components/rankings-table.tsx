@@ -5,6 +5,7 @@ import { RankingContext } from "@/components/ranking-context";
 import { measures } from "@/lib/measures";
 import type { SchoolRow } from "@/lib/contract";
 import type { Measure } from "@/types/data";
+import { yearLabel } from "@/lib/query";
 
 export function RankingsTable({
   entries,
@@ -20,7 +21,7 @@ export function RankingsTable({
     <div className="table-wrap">
       <table>
         <caption className="sr-only">
-          {measures[measure].label} rankings · {year}
+          {measures[measure].label} rankings · {yearLabel(year)}
         </caption>
         <thead>
           <tr>
@@ -55,6 +56,11 @@ export function RankingsTable({
               </td>
               <td className="number w-28 min-w-24 px-3 md:w-auto md:min-w-40 md:px-4">
                 <DataValue value={row[measure]} measure={measure} bar />
+                {row.aggregation && (
+                  <span className="mt-1 block text-xs text-muted">
+                    Mean · {row.aggregation.counts[measure]} years
+                  </span>
+                )}
               </td>
               <td className="number hidden md:table-cell">
                 <DataValue value={row[secondary]} measure={secondary} />

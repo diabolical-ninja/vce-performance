@@ -43,13 +43,12 @@ export default async function ProfilePage({
       <PageHeading
         title={row.name}
         description={`${row.locality} · ${state.year} results`}
-        kicker="School profile"
       />
       <Filters
         state={state}
         years={years}
         context={row.profileYear !== null}
-        mode="compare"
+        mode="profile"
       />
       <ProfileSummary row={row} />
       <h2 className="mb-4">Annual history</h2>

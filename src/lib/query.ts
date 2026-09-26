@@ -1,7 +1,16 @@
 import { measureKeys } from "@/lib/measures";
 import type { FilterState, Params, Measure } from "@/types/data";
 
-export const MAX_SELECTION = 4;
+export const MAX_SELECTION = 12;
+export const ALL_YEARS = 0;
+export const DEFAULT_ENROLMENTS = 50;
+export interface FilterOptions {
+  allYears?: boolean;
+  minimum?: number;
+}
+export function yearLabel(year: number): string {
+  return year === ALL_YEARS ? "All years" : String(year);
+}
 const TOP_FIVE = 5,
   TOP_TEN = 10,
   TOP_TWENTY_FIVE = 25,
@@ -13,9 +22,15 @@ export function scalar(
 ): string {
   return typeof value === "string" ? value : fallback;
 }
-export function readFilters(params: Params, years: number[]): FilterState {
+export function readFilters(
+  params: Params,
+  years: number[],
+  options: FilterOptions = {},
+): FilterState {
   const requestedYear = Number(scalar(params.year));
-  const year = years.includes(requestedYear) ? requestedYear : years[0];
+  let year = years.includes(requestedYear) ? requestedYear : years[0];
+  if (options.allYears && scalar(params.year).toLowerCase() === "all")
+    year = ALL_YEARS;
   const requestedMeasure = scalar(params.measure) as Measure;
   const measure = measureKeys.includes(requestedMeasure)
     ? requestedMeasure
@@ -28,7 +43,10 @@ export function readFilters(params: Params, years: number[]): FilterState {
     measure,
     top,
     sector: scalar(params.sector),
-    minimum: Math.max(0, Number(scalar(params.minimum)) || 0),
+    minimum: Math.max(
+      0,
+      Number(scalar(params.minimum, String(options.minimum ?? 0))) || 0,
+    ),
     query: scalar(params.q),
     sort: scalar(params.sort, "name"),
     selected: [

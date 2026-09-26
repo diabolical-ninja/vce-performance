@@ -33,14 +33,11 @@ export default function RootLayout({
             <Suspense>
               <Navigation />
             </Suspense>
-            <span className="hidden text-xs text-muted xl:block">
-              Victorian school results
-            </span>
           </div>
         </header>
         <main
           id="main"
-          className="mx-auto min-h-[75vh] max-w-7xl px-4 py-7 md:px-6 md:py-9"
+          className="mx-auto min-h-[75vh] max-w-7xl px-4 py-4 md:px-6 md:py-5"
         >
           {children}
         </main>

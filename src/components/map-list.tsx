@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { CarryLink } from "@/components/navigation";
 import { DataValue } from "@/components/data-value";
 import { Button } from "@/components/ui/button";
-import type { LocatedSchool } from "@/lib/map";
+import { mapPeriod, type LocatedSchool } from "@/lib/map";
 import type { Measure } from "@/types/data";
 
 export function MapList({
@@ -35,8 +35,8 @@ export function MapList({
                 </span>
               </div>
               <p className="mt-2 text-xs text-muted">
-                {row.locality} · Results {row.year} · Location{" "}
-                {row.locationYear}
+                {row.locality} · {row.sector} · {mapPeriod(row, measure)} ·
+                Location {row.locationYear}
               </p>
               <Button
                 variant="ghost"

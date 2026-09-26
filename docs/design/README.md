@@ -2,6 +2,8 @@
 
 Design proposal for a future Next.js version. Recorded 13 September 2026.
 
+**Implementation follow-up:** the owner's subsequent [compact-layout and interaction revision](interaction-revision.md) supersedes the original hero, four-school limit, single-year controls and map-search interaction below.
+
 The agreed direction is a clear, professional public-data site for schools and parents. Use a fixed light appearance, white surfaces, soft blue accents and readable sans-serif typography. Give the site warmth through colour, spacing and helpful language while keeping the figures central.
 
 This package captures the approved design and its final interaction change: **adding a school in Compare uses a searchable dropdown**. It documents the future build; it does not introduce a Next.js application or change the running Dash app.

@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from scripts.export_website import SOURCE, MEASURES, convert, export, number
+from scripts.all_years import summarize
 
 
 class WebsiteExportTests(unittest.TestCase):
@@ -50,3 +51,23 @@ class WebsiteExportTests(unittest.TestCase):
         recent = next(row for row in self.rows if row["year"] == "2025")
         self.assertIsNone(convert(recent, 4)["profileYear"])
         self.assertIsNone(convert(recent, 4)["locationYear"])
+
+    def test_all_years_uses_unweighted_available_values_and_latest_known_context(self):
+        old = convert(self.rows[0], 2)
+        recent = {**old, "year": 2025, "median": 40, "high": None,
+                  "profileYear": None, "sector": "Unknown", "locationYear": None, "lat": None, "lng": None}
+        result = summarize([recent, old], MEASURES)[0]
+        self.assertEqual(result["median"], 36)
+        self.assertEqual(result["high"], old["high"])
+        self.assertEqual(result["aggregation"]["counts"]["median"], 2)
+        self.assertEqual(result["aggregation"]["counts"]["high"], 1)
+        self.assertEqual(result["profileYear"], 2014)
+        self.assertEqual(result["locationYear"], 2014)
+        self.assertEqual(result["sector"], "Catholic")
+        unknown = {**recent, "median": None}
+        unavailable = summarize([unknown], MEASURES)[0]
+        self.assertIsNone(unavailable["median"])
+        self.assertEqual(unavailable["aggregation"]["counts"]["median"], 0)
+        self.assertIsNone(unavailable["profileYear"])
+        self.assertIsNone(unavailable["locationYear"])
+        self.assertEqual(len(summarize([old, {**old, "id": "other-campus"}], MEASURES)), 2)

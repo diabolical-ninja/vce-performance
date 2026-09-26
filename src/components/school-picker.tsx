@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type ReactElement,
 } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, TriangleAlert } from "lucide-react";
 import { useSelection } from "@/components/selection";
 import { matchesSchool } from "@/lib/schools";
 import { MAX_SELECTION } from "@/lib/query";
@@ -71,8 +71,13 @@ export function SchoolPicker({
         {announcement} {open ? `${options.length} matching schools.` : ""}
       </p>
       {ids.length >= MAX_SELECTION ? (
-        <p className="notice">
-          Four-school comparison limit reached. Remove a school to add another.
+        <p
+          role="alert"
+          className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+        >
+          <TriangleAlert size={18} className="shrink-0" aria-hidden="true" />
+          {MAX_SELECTION}-school comparison limit reached. Remove a school to
+          add another.
         </p>
       ) : (
         <div className="relative">

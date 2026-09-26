@@ -3,10 +3,18 @@ import { measures } from "@/lib/measures";
 import type { Measure, Selection } from "@/types/data";
 
 export const seriesStyles = [
-  { color: "#2864D7", dash: "" },
-  { color: "#258393", dash: "8 4" },
-  { color: "#8765BD", dash: "2 4" },
-  { color: "#BB7629", dash: "10 3 2 3" },
+  { color: "#4e79a7", dash: "" },
+  { color: "#f28e2b", dash: "8 4" },
+  { color: "#e15759", dash: "2 4" },
+  { color: "#76b7b2", dash: "10 3 2 3" },
+  { color: "#59a14f", dash: "" },
+  { color: "#edc948", dash: "8 4" },
+  { color: "#b07aa1", dash: "2 4" },
+  { color: "#ff9da7", dash: "10 3 2 3" },
+  { color: "#9c755f", dash: "" },
+  { color: "#bab0ab", dash: "8 4" },
+  { color: "#2f2f2f", dash: "2 4" },
+  { color: "#6f42c1", dash: "10 3 2 3" },
 ];
 export const plot = {
   width: 900,

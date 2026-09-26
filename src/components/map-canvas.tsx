@@ -3,8 +3,12 @@
 import { useEffect, useRef, type ReactElement } from "react";
 import type { Map as LeafletMap, CircleMarker } from "leaflet";
 import { highlightSchool } from "@/lib/map-selection";
-import { formatValue } from "@/lib/measures";
-import { pointColor, type Bounds, type LocatedSchool } from "@/lib/map";
+import {
+  mapLabel,
+  pointColor,
+  type Bounds,
+  type LocatedSchool,
+} from "@/lib/map";
 import type { Measure } from "@/types/data";
 import "leaflet/dist/leaflet.css";
 
@@ -61,11 +65,11 @@ export function MapCanvas({
           }).addTo(map);
           markerStore.set(row.id, marker);
           const label = document.createElement("span");
-          label.textContent = `${row.name} · ${row.year}: ${formatValue(row[measure], measure)}`;
+          label.textContent = mapLabel(row, measure);
           marker.bindTooltip(label).on("click", (): void => onSelect(row.id));
         });
         highlightSchool(map, markerStore, currentSelection.current);
-        map.on("moveend", (): void => {
+        const reportBounds = (): void => {
           const bounds = map.getBounds();
           onMove({
             north: bounds.getNorth(),
@@ -73,11 +77,14 @@ export function MapCanvas({
             east: bounds.getEast(),
             west: bounds.getWest(),
           });
-        });
+        };
+        map.on("moveend", reportBounds);
+        reportBounds();
+        const element = container.current!;
         const observer = new ResizeObserver((): void => {
-          map.invalidateSize();
+          if (element.clientWidth > 0) map.invalidateSize();
         });
-        observer.observe(container.current!);
+        observer.observe(element);
         map.on("unload", (): void => observer.disconnect());
       })
       .catch(onFailure);

@@ -46,6 +46,24 @@ test("rankings load immediately, use exact source values, include ties and handl
   page,
 }): Promise<void> => {
   await page.goto("/");
+  await expect(page.getByLabel("Results year")).toHaveValue("all");
+  await expect(page.getByLabel("Minimum total school enrolments")).toHaveValue(
+    "50",
+  );
+  await expect(
+    page.getByLabel("Minimum total school enrolments"),
+  ).toBeVisible();
+  await expect(page.locator("tbody tr").first()).toContainText("Mean");
+  expect(
+    await page
+      .getByRole("heading", { level: 1 })
+      .locator("..")
+      .evaluate((element): number => element.getBoundingClientRect().height),
+  ).toBeLessThan(110);
+  await page.getByLabel("Results year").selectOption("2025");
+  await expect(page.getByRole("table")).toHaveAccessibleName(
+    "Median study score rankings · 2025",
+  );
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "VCE school rankings",
   );
@@ -88,7 +106,6 @@ test("rankings load immediately, use exact source values, include ties and handl
       page.locator("tbody tr").first().locator("td").nth(2),
     ).not.toBeEmpty();
   }
-  await page.getByText("Enrolment filter", { exact: true }).click();
   await page.getByLabel("Minimum total school enrolments").fill("99999");
   await page.getByRole("button", { name: "Apply filter" }).click();
   await expect(page.getByText("No available results")).toBeVisible();
@@ -102,15 +119,33 @@ test("directory, profiles, comparison selections and history survive search and 
   await page.getByRole("button", { name: "Apply search" }).click();
   await expect(page.locator("tbody tr").first()).toContainText("Academy");
   await page.getByRole("checkbox", { name: /Compare Academy/ }).check();
-  await expect(page.getByRole("status")).toHaveText("1 of 4 schools selected");
+  await expect(page.getByRole("status")).toHaveText("1 of 12 schools selected");
   await page.getByRole("link", { name: academy.name, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     academy.name,
   );
   await expect(page.getByText(/No 2025 profile is available/)).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: `${academy.name} · 2024 · Median study score: 32`,
+      exact: true,
+    })
+    .hover();
+  await expect(page.getByRole("tooltip")).toContainText(
+    "Median study score: 32",
+  );
+  await page.getByRole("heading", { level: 1 }).hover();
   await audit(page);
   await page.getByLabel("Results year").selectOption("2024");
   await expect(page.getByText(/^ACARA school profile/)).toContainText("2024");
+  expect(
+    await page
+      .locator("dl dd")
+      .first()
+      .locator("span")
+      .first()
+      .evaluate((element): string => getComputedStyle(element).alignItems),
+  ).toBe("flex-start");
   await page.getByRole("link", { name: "Open comparison →" }).click();
   await expect(
     page.getByRole("button", { name: `Remove ${academy.name}` }),
@@ -126,7 +161,7 @@ test("directory, profiles, comparison selections and history survive search and 
   await page.goto("/schools?q=zzznomatch");
   await expect(page.getByText(/No schools match/)).toBeVisible();
 });
-test("comparison picker supports browsing, keyboard, four schools, removal, shared tables and all measures", async ({
+test("comparison picker supports twelve schools, tooltips, persistent annual tables and all measures", async ({
   page,
 }): Promise<void> => {
   await page.goto("/compare");
@@ -140,30 +175,53 @@ test("comparison picker supports browsing, keyboard, four schools, removal, shar
   await expect(
     page.getByRole("button", { name: `Remove ${academy.name}` }),
   ).toBeVisible();
-  for (const name of [
-    "Aitken College",
-    "Albert Park College",
-    "Melbourne High School",
-  ]) {
+  const names = [
+    ...new Set(
+      latest
+        .filter(
+          (row): boolean => row.name !== academy.name && row.median !== null,
+        )
+        .map((row): string => row.name),
+    ),
+  ].slice(0, 11);
+  for (const name of names) {
     await input.fill(name);
     await page.getByRole("option").first().click();
     await expect(
       page.getByRole("button", { name: `Remove ${name}`, exact: true }),
     ).toBeVisible();
   }
-  await expect(page.getByText(/Four-school comparison limit/)).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "12-school" }),
+  ).toContainText("12-school comparison limit");
+  await expect(page.getByRole("button", { name: /^Remove / })).toHaveCount(12);
+  await expect(page.getByLabel("Results year")).toHaveCount(0);
+  await expect(page.getByText("Results at a glance")).toHaveCount(0);
+  await expect(page.getByRole("table")).toBeVisible();
+  const point = page.getByRole("button", {
+    name: `${academy.name} · 2024 · Median study score: 32`,
+    exact: true,
+  });
+  await point.focus();
+  await expect(page.getByRole("tooltip")).toHaveText(
+    `${academy.name} · 2024 · Median study score: 32`,
+  );
+  await point.press("Escape");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
   await expect(
     page.getByRole("combobox", { name: "Add a school" }),
   ).toHaveCount(0);
   await page
-    .getByRole("button", { name: "Remove Aitken College", exact: true })
+    .getByRole("button", { name: `Remove ${names[0]}`, exact: true })
     .click();
   await expect(input).toBeVisible();
   await input.click();
   await input.press("Escape");
   await expect(input).toHaveAttribute("aria-expanded", "false");
   await audit(page);
+  await page.getByRole("button", { name: "Hide annual data table" }).click();
   await page.getByRole("button", { name: "View annual data table" }).click();
+  await expect(page.getByRole("group", { name: /Annual/ })).toBeVisible();
   await expect(page.getByRole("table").first().locator("tbody tr")).toHaveCount(
     12,
   );
@@ -186,14 +244,13 @@ test("comparison picker supports browsing, keyboard, four schools, removal, shar
   await page.reload();
   await expect(page.getByLabel("Show full scale")).toBeChecked();
   await expect(
-    page.getByRole("button", { name: "View trend chart" }),
+    page.getByRole("button", { name: "Hide annual data table" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "View trend chart" }).click();
-  await expect(page.getByRole("img", { name: /Annual/ })).toBeVisible();
+  await page.getByRole("button", { name: "Hide annual data table" }).click();
+  await expect(page.getByRole("group", { name: /Annual/ })).toBeVisible();
 });
-test("map has real points, exact list values, explicit area search and offline fallback", async ({
+test("map zooms suburb searches, follows the viewport, switches desktop views and offers all-year results", async ({
   page,
-  isMobile,
 }): Promise<void> => {
   await page.route("**/*.tile.openstreetmap.org/**", (route): Promise<void> =>
     route.abort(),
@@ -202,15 +259,49 @@ test("map has real points, exact list values, explicit area search and offline f
   await expect(page.getByLabel("Results year")).toHaveValue("2024");
   await expect(page.locator(".leaflet-interactive").first()).toBeAttached();
   await expect(page.getByText(/Map tiles could not be loaded/)).toBeVisible();
-  if (isMobile) await page.getByRole("button", { name: "Show list" }).click();
+  const list = page.getByRole("region", { name: "Schools in this area" });
+  await expect(list.locator("li").first()).toBeVisible();
+  const zoomedCount = await list.locator("li").count();
+  expect(zoomedCount).toBeLessThan(100);
+  const names = await list.getByRole("link").allTextContents();
+  expect(
+    names.some((name): boolean =>
+      rows.some(
+        (row): boolean =>
+          row.year === 2024 && row.name === name && row.locality !== "FITZROY",
+      ),
+    ),
+  ).toBe(true);
   await page.getByRole("button", { name: "Select school" }).first().click();
   await expect(page.getByText(/Selected:/)).toBeVisible();
+  await page.locator('.leaflet-interactive[stroke="#193C69"]').hover();
+  await expect(page.locator(".leaflet-tooltip")).toContainText(
+    "Median study score:",
+  );
+  await expect(page.locator(".leaflet-tooltip")).toContainText("sector");
+  await page.getByRole("heading", { level: 1 }).click();
   await expect(
     page.getByRole("region", { name: "Schools in this area" }),
   ).toContainText("Results 2024 · Location 2024");
   await audit(page);
-  await page.getByRole("button", { name: "Search this area" }).click();
+  await page.getByRole("button", { name: "Show list", exact: true }).click();
+  await expect(
+    page.getByLabel("School locations map", { exact: true }),
+  ).toBeHidden();
+  await page.getByRole("button", { name: "Show map", exact: true }).click();
+  await expect(list).toBeHidden();
+  await page.getByRole("button", { name: "Show map and list" }).click();
+  await expect(list).toBeVisible();
+  await page.getByRole("button", { name: "Zoom out", exact: true }).click();
+  await expect
+    .poll(async (): Promise<number> => list.locator("li").count())
+    .toBeGreaterThan(zoomedCount);
   await page.getByRole("button", { name: "All Victoria" }).click();
+  await expect
+    .poll(async (): Promise<number> => list.locator("li").count())
+    .toBeGreaterThan(500);
+  await page.getByLabel("Results year").selectOption("all");
+  await expect(list).toContainText("Mean over");
   await page.getByLabel("Results year").selectOption("2025");
   await expect(page.getByText(/No same-year location coverage/)).toBeVisible();
 });

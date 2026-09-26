@@ -35,7 +35,7 @@ export function ProfileSummary({ row }: { row: SchoolRow }): ReactElement {
           {context.map((key): ReactElement => (
             <div key={key}>
               <dt className="text-xs text-muted">{measures[key].label}</dt>
-              <dd className="my-2 text-lg">
+              <dd className="my-2 text-left text-lg [&>span]:items-start">
                 <DataValue value={row[key]} measure={key} />
               </dd>
               <dd className="text-xs leading-relaxed text-muted">

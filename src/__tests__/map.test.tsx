@@ -21,6 +21,7 @@ const mocks = vi.hoisted(
     remove: ReturnType<typeof vi.fn>;
     resize: () => void;
     disconnect: ReturnType<typeof vi.fn>;
+    bounds: { north: number; south: number; east: number; west: number };
   } => ({
     events: {},
     tileEvents: {},
@@ -29,13 +30,21 @@ const mocks = vi.hoisted(
     remove: vi.fn(),
     resize: (): void => {},
     disconnect: vi.fn(),
+    bounds: { north: -33.9, south: -39.2, west: 140.8, east: 150.1 },
   }),
 );
 vi.mock("leaflet", (): object => ({
   map: (): object => {
     if (mocks.fail) throw new Error("Map unavailable");
     return {
-      fitBounds: vi.fn(),
+      fitBounds: (corners: number[][]): void => {
+        mocks.bounds = {
+          south: corners[0][0],
+          west: corners[0][1],
+          north: corners[1][0],
+          east: corners[1][1],
+        };
+      },
       panInside: vi.fn(),
       invalidateSize: vi.fn(),
       on: (name: string, callback: () => void): void => {
@@ -43,10 +52,10 @@ vi.mock("leaflet", (): object => ({
       },
       remove: mocks.remove,
       getBounds: (): object => ({
-        getNorth: (): number => -36,
-        getSouth: (): number => -38,
-        getWest: (): number => 144,
-        getEast: (): number => 146,
+        getNorth: (): number => mocks.bounds.north,
+        getSouth: (): number => mocks.bounds.south,
+        getWest: (): number => mocks.bounds.west,
+        getEast: (): number => mocks.bounds.east,
       }),
     };
   },
@@ -105,9 +114,16 @@ it("mounts the map, reacts to movement, tile failure, resize and point selection
   );
   await waitFor((): void => expect(mocks.markers).toHaveLength(1));
   act((): void => {
+    mocks.bounds = { north: -36, south: -38, west: 144, east: 146 };
     mocks.events.moveend();
     mocks.markers[0]();
     mocks.tileEvents.tileerror();
+    mocks.resize();
+    Object.defineProperty(
+      screen.getByLabelText("School locations map"),
+      "clientWidth",
+      { value: 800, configurable: true },
+    );
     mocks.resize();
     mocks.events.unload();
   });
@@ -144,7 +160,7 @@ it("cancels a pending map import and reports initialization failures", async ():
   render(<MapCanvas {...props} />);
   await waitFor((): void => expect(failure).toHaveBeenCalledOnce());
 });
-it("synchronizes the map and list, supports explicit area search and a tile-free fallback", async (): Promise<void> => {
+it("automatically synchronizes the visible area and supports map/list modes and a tile-free fallback", async (): Promise<void> => {
   render(
     <MapExplorer
       rows={[
@@ -158,18 +174,34 @@ it("synchronizes the map and list, supports explicit area search and a tile-free
   await waitFor((): void => expect(mocks.markers).toHaveLength(2));
   act((): void => {
     mocks.tileEvents.tileerror();
+    mocks.bounds = { north: -36, south: -38, west: 144, east: 146 };
     mocks.events.moveend();
   });
   expect(screen.getByText(/Map tiles could not be loaded/)).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Search this area" }));
   expect(screen.getByText(/1 located records/)).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Select school" }));
   expect(screen.getByText(/Selected:/)).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Show list" }));
   expect(screen.getByRole("button", { name: "Show map" })).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Show map" }));
+  fireEvent.click(screen.getByRole("button", { name: "Show map and list" }));
   fireEvent.click(screen.getByRole("button", { name: "All Victoria" }));
   expect(screen.getByText(/2 located records/)).toBeVisible();
+});
+it("zooms to a known search and preserves a useful no-match state", async (): Promise<void> => {
+  const searchArea = { north: -37, south: -38, west: 144, east: 146 };
+  const { unmount } = render(
+    <MapExplorer
+      rows={[base]}
+      measure="median"
+      query="Fitzroy"
+      searchArea={searchArea}
+    />,
+  );
+  await waitFor((): void => expect(mocks.bounds).toEqual(searchArea));
+  unmount();
+  render(<MapExplorer rows={[base]} measure="median" query="zzznomatch" />);
+  expect(screen.getByText(/No located suburb or school matches/)).toBeVisible();
 });
 it("keeps empty location searches usable", (): void => {
   render(<MapList rows={[]} selected="" measure="median" onSelect={vi.fn()} />);

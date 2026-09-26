@@ -1,5 +1,7 @@
 import type { SchoolRow } from "@/lib/contract";
 import type { Measure } from "@/types/data";
+import { matchesSchool } from "@/lib/schools";
+import { formatValue, measures } from "@/lib/measures";
 
 export interface Bounds {
   north: number;
@@ -41,9 +43,43 @@ export function pointColor(
   range: [number, number],
 ): string {
   if (value === null) return "#6b7280";
-  const lightness = 70,
-    span = 40,
-    hue = 216;
-  const fraction = (value - range[0]) / Math.max(1, range[1] - range[0]);
-  return `hsl(${hue} 65% ${lightness - fraction * span}%)`;
+  const low = { r: 78, g: 134, b: 212 },
+    high = { r: 200, g: 45, b: 55 };
+  const fraction = Math.max(
+    0,
+    Math.min(1, (value - range[0]) / Math.max(1, range[1] - range[0])),
+  );
+  const channels = ["r", "g", "b"] as const;
+  const rgb = channels.map((key): number =>
+    Math.round(low[key] + (high[key] - low[key]) * fraction),
+  );
+  return `rgb(${rgb.join(", ")})`;
+}
+export function searchBounds(
+  rows: LocatedSchool[],
+  query: string,
+): Bounds | null {
+  if (!query.trim()) return null;
+  const exact = rows.filter(
+    (row): boolean => row.locality.toLowerCase() === query.trim().toLowerCase(),
+  );
+  const matching = exact.length
+    ? exact
+    : rows.filter((row): boolean => matchesSchool(row, query));
+  if (!matching.length) return null;
+  const padding = 0.012;
+  return {
+    north: Math.max(...matching.map((row): number => row.lat)) + padding,
+    south: Math.min(...matching.map((row): number => row.lat)) - padding,
+    east: Math.max(...matching.map((row): number => row.lng)) + padding,
+    west: Math.min(...matching.map((row): number => row.lng)) - padding,
+  };
+}
+export function mapPeriod(row: SchoolRow, measure: Measure): string {
+  return row.aggregation
+    ? `All years ${row.aggregation.startYear}–${row.aggregation.endYear} · Mean over ${row.aggregation.counts[measure]} available years`
+    : `Results ${row.year}`;
+}
+export function mapLabel(row: SchoolRow, measure: Measure): string {
+  return `${row.name} · ${measures[measure].label}: ${formatValue(row[measure], measure)} · ${row.sector} sector (profile ${row.profileYear ?? "unavailable"}) · ${mapPeriod(row, measure)} · Location ${row.locationYear}`;
 }

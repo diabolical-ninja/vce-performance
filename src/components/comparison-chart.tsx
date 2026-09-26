@@ -22,7 +22,7 @@ export function ComparisonChart({
 }): ReactElement {
   const params = useSearchParams(),
     path = usePathname();
-  const table = params.get("view") === "table",
+  const table = params.get("view") !== "chart",
     full = params.get("scale") === "full";
   function update(key: string, value: string): void {
     // Next integrates native History with useSearchParams. Presentation-only
@@ -34,30 +34,16 @@ export function ComparisonChart({
     );
   }
   return (
-    <section className="panel">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-        <div>
-          <h2>{measures[measure].label}</h2>
-          <p className="mt-1 text-xs text-muted">
-            Annual reported values · {measures[measure].unit}
-          </p>
+    <>
+      <section className="panel">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+          <div>
+            <h2>{measures[measure].label}</h2>
+            <p className="mt-1 text-xs text-muted">
+              Annual reported values · {measures[measure].unit}
+            </p>
+          </div>
         </div>
-        <Button
-          variant="ghost"
-          aria-pressed={table}
-          onClick={(): void => update("view", table ? "chart" : "table")}
-        >
-          {table ? "View trend chart" : "View annual data table"}
-        </Button>
-      </div>
-      {table ? (
-        <AnnualTable
-          schools={schools}
-          rows={rows}
-          years={[...years].reverse()}
-          measure={measure}
-        />
-      ) : (
         <TrendChart
           schools={schools}
           rows={rows}
@@ -65,27 +51,50 @@ export function ComparisonChart({
           measure={measure}
           full={full}
         />
-      )}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-4 text-xs text-muted">
-        <p>
-          {full ? "Full scale" : "Focused scale"} ·{" "}
-          {measures[measure].definition}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-4 text-xs text-muted">
+          <p>
+            {full ? "Full scale" : "Focused scale"} ·{" "}
+            {measures[measure].definition}
+          </p>
+          <label className="flex min-h-11 items-center gap-2">
+            <input
+              className="size-4 min-h-4 accent-primary"
+              type="checkbox"
+              checked={full}
+              onChange={(): void => update("scale", full ? "focused" : "full")}
+            />
+            Show full scale
+          </label>
+        </div>
+        <p className="px-5 pb-4 text-xs text-muted">
+          Straight segments connect reported observations, not estimates for
+          intervening years. Missing annual values break the lines. Swipe the
+          chart horizontally on small screens; labels retain their size.
         </p>
-        <label className="flex min-h-11 items-center gap-2">
-          <input
-            className="size-4 min-h-4 accent-primary"
-            type="checkbox"
-            checked={full}
-            onChange={(): void => update("scale", full ? "focused" : "full")}
-          />
-          Show full scale
-        </label>
-      </div>
-      <p className="px-5 pb-4 text-xs text-muted">
-        Straight segments connect reported observations, not estimates for
-        intervening years. Missing annual values break the lines. Swipe the
-        chart horizontally on small screens; labels retain their size.
-      </p>
-    </section>
+      </section>
+      <section className="mt-5" aria-label="Annual data">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2>Annual data</h2>
+          <Button
+            variant="outline"
+            aria-expanded={table}
+            aria-controls="annual-data"
+            onClick={(): void => update("view", table ? "chart" : "table")}
+          >
+            {table ? "Hide annual data table" : "View annual data table"}
+          </Button>
+        </div>
+        {table && (
+          <div id="annual-data">
+            <AnnualTable
+              schools={schools}
+              rows={rows}
+              years={[...years].reverse()}
+              measure={measure}
+            />
+          </div>
+        )}
+      </section>
+    </>
   );
 }

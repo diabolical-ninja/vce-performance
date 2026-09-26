@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { ALL_YEARS } from "@/lib/query";
 
 export function CoverageNote({
   year,
@@ -7,6 +8,16 @@ export function CoverageNote({
   year: number;
   context: boolean;
 }): ReactElement {
+  if (year === ALL_YEARS)
+    return (
+      <p id="context-note" className="mb-4 text-xs leading-relaxed text-muted">
+        All years: unweighted averages of available annual values, with
+        available-year counts. The mean of annual school medians is not a pooled
+        student median. Enrolments use the average whole-school count (default
+        minimum 50 on Rankings), not the VCE cohort. Sector uses the latest
+        available profile; map locations use the latest recorded coordinates.
+      </p>
+    );
   return (
     <p id="context-note" className="mb-5 text-xs leading-relaxed text-muted">
       {context

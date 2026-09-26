@@ -1,5 +1,6 @@
 import type { SchoolRow } from "@/lib/contract";
 import type { FilterState, Selection } from "@/types/data";
+import { ALL_YEARS } from "@/lib/query";
 
 export function yearsOf(rows: SchoolRow[]): number[] {
   return [...new Set(rows.map((row): number => row.year))].sort(
@@ -28,7 +29,9 @@ export function directory(rows: SchoolRow[]): Selection[] {
   );
 }
 export function filterRows(rows: SchoolRow[], state: FilterState): SchoolRow[] {
-  const annual = rows.filter((row): boolean => row.year === state.year);
+  const annual = rows.filter(
+    (row): boolean => state.year === ALL_YEARS || row.year === state.year,
+  );
   const hasContext = annual.some((row): boolean => row.profileYear !== null);
   return annual.filter(
     (row): boolean =>

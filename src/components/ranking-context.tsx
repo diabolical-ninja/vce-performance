@@ -6,6 +6,12 @@ export function RankingContext({ row }: { row: SchoolRow }): ReactElement {
   return (
     <details className="mt-1 text-xs">
       <summary className="py-2 font-normal text-muted">School context</summary>
+      {row.aggregation && (
+        <p className="mb-2">
+          Context averages · {row.aggregation.startYear}–
+          {row.aggregation.endYear}; latest sector shown below.
+        </p>
+      )}
       <p className="mb-2">
         {row.profileYear === null
           ? "No same-year school profile is available."

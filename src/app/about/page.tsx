@@ -79,30 +79,17 @@ export default function AboutPage(): ReactElement {
             before interpreting historical changes.
           </p>
         </section>
-        <section>
-          <h2>Missing results, rankings and interpretation</h2>
-          <p className="mt-3">
-            The existing ETL collapses source markers such as “–” and “I/D” into
-            nulls. We display “Unavailable in this dataset”, not zero, because
-            the analytical file cannot distinguish the original states. Rankings
-            count unavailable values separately and include ties at the cutoff
-            using competition ranking. No average of school medians is presented
-            as a statewide student benchmark.
-          </p>
-          <p className="mt-3">
-            Annual cohorts differ. Changes in study scores use points; rates use
-            percentage points. Intake, size, subjects and student circumstances
-            affect results. No single measure is an overall school-quality
-            rating.
-          </p>
-        </section>
+        <RankingMethod />
         <section>
           <h2>Dates and reproducibility</h2>
           <p className="mt-3">
             Results, profiles and coordinates each retain their actual source
             year. No verified dataset refresh timestamp is supplied, so none is
             invented. The map defaults to the latest year with location coverage
-            and does not borrow coordinates for newer results.
+            and single-year views do not borrow older coordinates. All-years
+            summaries use the latest recorded location and sector for each exact
+            source identity, explicitly showing their dates alongside the
+            averaging period.
           </p>
           <p className="mt-3 break-all text-xs">
             Analytical CSV SHA-256: <code>{dataset.sourceSha256}</code>
@@ -122,5 +109,32 @@ export default function AboutPage(): ReactElement {
         </section>
       </div>
     </>
+  );
+}
+function RankingMethod(): ReactElement {
+  return (
+    <section>
+      <h2>Missing results, rankings and interpretation</h2>
+      <p className="mt-3">
+        All years uses a Python-calculated, unweighted average of each school’s
+        available annual values. Each measure has its own available-year count;
+        missing years are not zero. Rankings use the unrounded average and
+        default to at least 50 average whole-school enrolments. An average of
+        annual school medians is not a pooled median of student scores.
+      </p>
+      <p className="mt-3">
+        The existing ETL collapses source markers such as “–” and “I/D” into
+        nulls. We display “Unavailable in this dataset”, not zero, because the
+        analytical file cannot distinguish the original states. Rankings count
+        unavailable values separately and include ties at the cutoff using
+        competition ranking. No average of school medians is presented as a
+        statewide student benchmark.
+      </p>
+      <p className="mt-3">
+        Annual cohorts differ. Changes in study scores use points; rates use
+        percentage points. Intake, size, subjects and student circumstances
+        affect results. No single measure is an overall school-quality rating.
+      </p>
+    </section>
   );
 }

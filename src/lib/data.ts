@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { cache } from "react";
 import { datasetSchema, type SchoolRow } from "@/lib/contract";
-import { readFilters } from "@/lib/query";
+import { ALL_YEARS, readFilters, type FilterOptions } from "@/lib/query";
 import { yearsOf } from "@/lib/schools";
 import type { Params, FilterState } from "@/types/data";
 
@@ -13,8 +13,14 @@ export function getRows(): SchoolRow[] {
 }
 export async function pageData(
   params: Promise<Params>,
+  options: FilterOptions = {},
 ): Promise<{ rows: SchoolRow[]; years: number[]; state: FilterState }> {
   const rows = getRows(),
     years = yearsOf(rows);
-  return { rows, years, state: readFilters(await params, years) };
+  const state = readFilters(await params, years, options);
+  return {
+    rows: state.year === ALL_YEARS ? getDataset().allYears : rows,
+    years,
+    state,
+  };
 }

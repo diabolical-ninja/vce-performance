@@ -3,18 +3,30 @@
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 import { MapCanvas } from "@/components/map-canvas";
 import { MapList } from "@/components/map-list";
-import { Button } from "@/components/ui/button";
-import { inside, located, mapRange, victoria, type Bounds } from "@/lib/map";
-import { formatValue, measures } from "@/lib/measures";
+import { MapControls, MapNotices } from "@/components/map-controls";
+import {
+  inside,
+  located,
+  mapRange,
+  mapLabel,
+  pointColor,
+  victoria,
+  type Bounds,
+} from "@/lib/map";
+import { formatValue } from "@/lib/measures";
 import type { SchoolRow } from "@/lib/contract";
 import type { Measure } from "@/types/data";
 
 export function MapExplorer({
   rows,
   measure,
+  searchArea = null,
+  query = "",
 }: {
   rows: SchoolRow[];
   measure: Measure;
+  searchArea?: Bounds | null;
+  query?: string;
 }): ReactElement {
   const points = useMemo(
     (): ReturnType<typeof located> => located(rows),
@@ -26,72 +38,58 @@ export function MapExplorer({
   );
   const [area, setArea] = useState<{
     viewport: Bounds;
-    pending: Bounds;
-    applied: Bounds;
-  }>({ viewport: victoria, pending: victoria, applied: victoria });
+    visible: Bounds;
+  }>({ viewport: searchArea ?? victoria, visible: searchArea ?? victoria });
   const [selected, setSelected] = useState(""),
     [failed, setFailed] = useState(false),
-    [view, setView] = useState("map");
+    [view, setView] = useState("both");
   const moved = useCallback(
     (bounds: Bounds): void =>
       setArea((previous): typeof previous => ({
         ...previous,
-        pending: bounds,
+        visible: bounds,
       })),
     [],
   );
   const failure = useCallback((): void => setFailed(true), []);
-  const visible = points.filter((row): boolean => inside(row, area.applied));
+  const visible = points.filter((row): boolean => inside(row, area.visible));
   const selection = points.find((row): boolean => row.id === selected);
   function reset(): void {
     setArea({
       viewport: { ...victoria },
-      pending: victoria,
-      applied: victoria,
+      visible: victoria,
     });
   }
   return (
     <>
-      <div className="mb-4 flex flex-wrap gap-3">
-        <Button variant="outline" onClick={reset}>
-          All Victoria
-        </Button>
-        <Button
-          onClick={(): void => setArea({ ...area, applied: area.pending })}
-        >
-          Search this area
-        </Button>
-        <Button
-          variant="outline"
-          aria-pressed={view === "list"}
-          onClick={(): void => setView(view === "map" ? "list" : "map")}
-        >
-          {view === "map" ? "Show list" : "Show map"}
-        </Button>
-      </div>
+      <MapControls view={view} onView={setView} onReset={reset} />
+      <MapNotices query={query} matched={Boolean(searchArea)} failed={failed} />
       <p className="mb-3 text-xs text-muted">
         {visible.length} located records in this area ·{" "}
         {rows.length - points.length} omitted because coordinates are
         unavailable. Equal-sized points show reported values; overlapping points
         remain separate school records in the list.
       </p>
-      {failed && (
-        <p role="status" className="notice mb-4">
-          Map tiles could not be loaded. The school list and exact results
-          remain available.
-        </p>
-      )}
       <div className="mb-4 flex items-center gap-3 text-xs">
         <span>{formatValue(range[0], measure)}</span>
         <span
           aria-hidden="true"
-          className="h-3 w-36 bg-gradient-to-r from-blue-300 to-blue-800"
+          className="h-3 w-36"
+          style={{
+            background: `linear-gradient(to right, ${pointColor(range[0], range)}, ${pointColor(range[1], range)})`,
+          }}
         />
         <span>{formatValue(range[1], measure)}</span>
         <span>Grey: unavailable</span>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-        <div className={view === "list" ? "hidden lg:block" : "block"}>
+      <div
+        className={
+          view === "both"
+            ? "grid gap-4 lg:grid-cols-[1.5fr_1fr]"
+            : "grid min-w-0 gap-4"
+        }
+      >
+        <div className={view === "list" ? "hidden" : "min-w-0"}>
           <MapCanvas
             selected={selected}
             rows={points}
@@ -103,7 +101,7 @@ export function MapExplorer({
             onFailure={failure}
           />
         </div>
-        <div className={view === "map" ? "hidden lg:block" : "block"}>
+        <div className={view === "map" ? "hidden" : "min-w-0"}>
           <MapList
             rows={visible}
             selected={selected}
@@ -114,9 +112,7 @@ export function MapExplorer({
       </div>
       {selection && (
         <p className="notice mt-4" role="status">
-          Selected: {selection.name} · {measures[measure].label}:{" "}
-          {formatValue(selection[measure], measure)} · Results {selection.year}{" "}
-          · Location {selection.locationYear}.{" "}
+          Selected: {mapLabel(selection, measure)}.{" "}
           <a href={`/schools/${selected}`}>Open school profile</a>
         </p>
       )}

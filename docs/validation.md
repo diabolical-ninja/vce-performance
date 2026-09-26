@@ -1,5 +1,13 @@
 # Redesign validation
 
+## Follow-up feedback validation
+
+The [compact-layout and interaction revision](design/interaction-revision.md) passed `npm run validate` with zero warnings: 4 Python tests, 34 unit/component tests with 100% statements/branches/functions/lines, 12 development-server browser tests and 12 production-server browser tests. Strict TypeScript, lint, formatting, dead-code, duplication, architecture, component-size checks and production build all passed.
+
+Browser checks now additionally verify the compact heading height, the visible default-50 enrolment filter, All-years rankings and maps, left-aligned profile context, all 12 comparison slots, point hover/focus tooltips, the full annual table below the persistent chart, and absence of the old comparison year/snapshot controls. Map tests confirm that a Fitzroy search zooms in while including neighbouring localities, that zoom changes automatically update the list, that desktop/mobile map-only and list-only modes actually hide the other view, and that map tooltips include the measure and sector. All 744 profile URLs were rechecked against development and production servers.
+
+The original `data_loader.py`, source spreadsheets and analytical CSV remain unchanged. All-years averages and per-measure observation counts are generated in Python; no ETL was ported to TypeScript. The original implementation's validation record follows.
+
 Validated on 13 September 2026 on branch `feat/nextjs-approved-redesign`.
 
 ## Complete quality gate

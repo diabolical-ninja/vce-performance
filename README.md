@@ -2,10 +2,10 @@
 
 Explore published Victorian school results with Next.js App Router, Tailwind CSS and shadcn-style components. The [approved design](docs/design/README.md) is implemented across:
 
-- Rankings for all available years and seven measures, with competition ranks and ties at the Top N cutoff.
+- Rankings for all available years and seven measures, including an All-years average, competition ranks and ties at the Top N cutoff. The visible minimum-enrolment filter defaults to 50.
 - A searchable school directory and durable profiles with dated context and annual histories.
-- Shareable comparisons for up to four schools, keyboard-searchable school selection, exact annual tables and focused/full-scale charts.
-- A school results map with an independent list, area search and tile-failure fallback.
+- Shareable comparisons for up to 12 schools, keyboard-searchable school selection, hover/focus tooltips, exact annual tables below the chart and focused/full-scale axes.
+- A school results map with blue-to-red values, working map/list modes, suburb zoom and an automatically synchronized viewport list, including tile-failure fallback.
 - Data definitions, provenance, downloads and correction guidance.
 
 **The ETL remains Python.** `data_loader.py` still owns spreadsheet normalization and joins. `scripts/export_website.py` publishes its CSV for the website. The deprecated Dash UI is retained in `legacy/dash_app.py`, outside the new runtime.
@@ -43,6 +43,8 @@ Validation includes Python row-by-row reconciliation, 100% Vitest unit/component
 The analytical CSV contains 7,007 rows across 2014–2025. The website preserves every row and all seven measures. Its 744 exact name/locality/ACARA identities are conservative source groupings, not a current-school count or a claim that renamed campuses have been reconciled.
 
 2025 results lack same-year school profiles and coordinates. Context filters are disabled for that year; the map defaults to 2024. Missing values remain unavailable rather than becoming zero. Total enrolments are not VCE cohort counts; tertiary applications are not admissions. Read `/about` for complete definitions and caveats.
+
+Rankings defaults to All years, using Python-generated unweighted means of available annual observations. The mean of annual school medians is not a pooled student median. All-years map points use the latest recorded coordinates for each exact source identity and display the location date. See the [interaction revision](docs/design/interaction-revision.md).
 
 ## Data
 

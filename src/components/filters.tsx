@@ -3,7 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactElement } from "react";
 import { measureKeys, measures } from "@/lib/measures";
-import { hrefWith, rankingLimits } from "@/lib/query";
+import { ALL_YEARS, hrefWith, rankingLimits } from "@/lib/query";
+import { MinimumEnrolments } from "@/components/minimum-enrolments";
 import type { FilterState } from "@/types/data";
 
 export function Filters({
@@ -27,16 +28,21 @@ export function Filters({
   }
   return (
     <div className="mb-5 flex flex-wrap items-end gap-4">
-      <Field label="Results year">
-        <select
-          value={state.year}
-          onChange={(event): void => update("year", event.target.value)}
-        >
-          {years.map((year): ReactElement => (
-            <option key={year}>{year}</option>
-          ))}
-        </select>
-      </Field>
+      {mode !== "compare" && (
+        <Field label="Results year">
+          <select
+            value={state.year === ALL_YEARS ? "all" : state.year}
+            onChange={(event): void => update("year", event.target.value)}
+          >
+            {["rankings", "map"].includes(mode) && (
+              <option value="all">All years</option>
+            )}
+            {years.map((year): ReactElement => (
+              <option key={year}>{year}</option>
+            ))}
+          </select>
+        </Field>
+      )}
       {mode !== "schools" && (
         <Field label={mode === "rankings" ? "Rank by" : "Measure"}>
           <select
@@ -47,7 +53,7 @@ export function Filters({
           </select>
         </Field>
       )}
-      {mode !== "compare" && (
+      {!["compare", "profile"].includes(mode) && (
         <Field label="Sector">
           <select
             value={context ? state.sector : ""}
@@ -64,6 +70,28 @@ export function Filters({
           </select>
         </Field>
       )}
+      <ExtraFilters
+        mode={mode}
+        state={state}
+        context={context}
+        update={update}
+      />
+    </div>
+  );
+}
+function ExtraFilters({
+  mode,
+  state,
+  context,
+  update,
+}: {
+  mode: string;
+  state: FilterState;
+  context: boolean;
+  update: (key: string, value: string) => void;
+}): ReactElement {
+  return (
+    <>
       {mode === "rankings" && (
         <Field label="Show">
           <select
@@ -90,7 +118,14 @@ export function Filters({
           </select>
         </Field>
       )}
-    </div>
+      {mode === "rankings" && (
+        <MinimumEnrolments
+          value={state.minimum}
+          disabled={!context}
+          onApply={update}
+        />
+      )}
+    </>
   );
 }
 function Field({

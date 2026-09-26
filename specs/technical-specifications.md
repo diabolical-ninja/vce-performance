@@ -9,7 +9,7 @@ Adopted from `/Users/yass/Repos/personal/melbournekidsactivities/AGENTS.md`, `sp
 - `src/components` shared UI, `src/components/ui` primitives, `src/lib` helpers, `src/types` shared contracts, `src/__tests__` unit/component tests and `e2e` browser tests. Source imports use `@/*`.
 - Prefer Server Components and route-level composition. Client modules never import Node modules or server data loading. Send only selected histories to chart clients; the picker receives lightweight identity records.
 - Explicit function return types; no `any`, unsafe operations, TypeScript suppression, implicit returns or switch fallthrough. No JavaScript application source.
-- All styles use Tailwind and CSS-variable theme tokens; conditional classes use `cn`. Fixed-light design from PR #13. Native semantic HTML, keyboard support, visible focus, touch targets, reduced motion and WCAG 2.2 AA are required.
+- All styles use Tailwind and CSS-variable theme tokens; conditional classes use `cn`. Fixed-light design from PR #13, updated by `docs/design/interaction-revision.md`. Native semantic HTML, keyboard support, visible focus, touch targets, reduced motion and WCAG 2.2 AA are required.
 
 ## Python ownership and data contract
 
@@ -18,6 +18,10 @@ Adopted from `/Users/yass/Repos/personal/melbournekidsactivities/AGENTS.md`, `sp
 IDs hash the exact source ACARA ID, name and locality. No fuzzy identity merges or undated context borrowing. Duplicate identity/year records stop the export for review. All seven measures, source-row references, nulls, separately dated profiles and coordinates are preserved. There are no inferred alias or renamed-campus joins; name search normalizes punctuation/case, and locality search is supported. Add aliases only after source verification.
 
 CSV SHA-256 identifies the source snapshot without inventing a refresh timestamp. Downloads serve the same analytical file. Context/source limitations and corrections are documented in `/about`.
+
+Contract version 2 adds Python-generated `allYears` summaries. Each measure is the unweighted mean of its non-null annual values, with an explicit available-year count. `scripts/all_years.py` preserves conservative source identities and labels the latest known sector/profile and coordinate dates. Single-year data remain unchanged. Rankings defaults to All years with 50 minimum average whole-school enrolments; Map supports All years while retaining its latest-located-year default.
+
+Comparisons support 12 schools, Tableau-based categorical colours, point tooltips, and an annual table below the persistent chart. A map suburb search changes the initial viewport, not the school membership. Both markers and the automatically refreshed visible-area list respect year/sector filters. Map-only, list-only and combined modes work at desktop and mobile widths.
 
 ## Quality gates
 
