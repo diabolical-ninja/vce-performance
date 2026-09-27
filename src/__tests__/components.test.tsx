@@ -43,6 +43,10 @@ it("provides shadcn variants, composed links, and active route navigation", (): 
   );
   fireEvent.click(screen.getByText("Action"));
   expect(clicked).toHaveBeenCalledOnce();
+  const menu = screen.getByRole("button", { name: "Menu" });
+  expect(menu).toHaveAttribute("aria-expanded", "false");
+  fireEvent.click(menu);
+  expect(menu).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByRole("link", { name: "Rankings" })).toHaveAttribute(
     "aria-current",
     "page",
@@ -56,12 +60,21 @@ it("provides shadcn variants, composed links, and active route navigation", (): 
     "href",
     "/compare?schools=a&year=2024",
   );
+  const schoolsLink = screen.getByRole("link", { name: "Schools" });
+  schoolsLink.addEventListener(
+    "click",
+    (event): void => event.preventDefault(),
+    { once: true },
+  );
+  fireEvent.click(schoolsLink);
+  expect(menu).toHaveAttribute("aria-expanded", "false");
 });
 it("exposes all filter modes and retains URL state on changes", (): void => {
   const state = readFilters({}, [2025, 2024]);
   const { rerender } = render(
     <Filters state={state} years={[2025, 2024]} context />,
   );
+  fireEvent.click(screen.getByText(/More filters/));
   for (const [label, value] of [
     ["Results year", "2024"],
     ["Rank by", "high"],

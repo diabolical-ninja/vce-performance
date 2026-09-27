@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { ReactElement, ReactNode } from "react";
+import { useState, type ReactElement, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { hrefWith } from "@/lib/query";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export function Brand(): ReactElement {
 }
 export function Navigation(): ReactElement {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   const destinations = [
     ["/", "Rankings"],
     ["/schools", "Schools"],
@@ -47,35 +49,57 @@ export function Navigation(): ReactElement {
     ["/about", "About the data"],
   ];
   return (
-    <nav aria-label="Main navigation" className="flex flex-wrap gap-1">
-      {destinations.map(([href, label]): ReactElement => (
-        <NavItem
-          key={href}
-          href={href}
-          label={label}
-          active={
-            pathname === href ||
-            (href === "/schools" && pathname.startsWith("/schools/"))
-          }
-        />
-      ))}
-    </nav>
+    <>
+      <Button
+        variant="outline"
+        className="md:hidden"
+        aria-expanded={open}
+        aria-controls="main-navigation"
+        onClick={(): void => setOpen(!open)}
+      >
+        Menu
+      </Button>
+      <nav
+        id="main-navigation"
+        aria-label="Main navigation"
+        className={cn(
+          "w-full flex-col gap-1 md:flex md:w-auto md:flex-row",
+          open ? "flex" : "hidden",
+        )}
+      >
+        {destinations.map(([href, label]): ReactElement => (
+          <NavItem
+            key={href}
+            href={href}
+            label={label}
+            onNavigate={(): void => setOpen(false)}
+            active={
+              pathname === href ||
+              (href === "/schools" && pathname.startsWith("/schools/"))
+            }
+          />
+        ))}
+      </nav>
+    </>
   );
 }
 function NavItem({
   href,
   label,
   active,
+  onNavigate,
 }: {
   href: string;
   label: string;
   active: boolean;
+  onNavigate: () => void;
 }): ReactElement {
   const params = useSearchParams();
   return (
     <Link
       href={hrefWith(href, new URLSearchParams(params), {})}
       aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
       className={cn(
         "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-muted hover:bg-accent hover:no-underline",
         active && "bg-accent text-primary",

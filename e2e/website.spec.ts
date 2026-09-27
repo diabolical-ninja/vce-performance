@@ -47,6 +47,7 @@ test("rankings load immediately, use exact source values, include ties and handl
 }): Promise<void> => {
   await page.goto("/");
   await expect(page.getByLabel("Results year")).toHaveValue("all");
+  await page.getByText(/More filters/).click();
   await expect(page.getByLabel("Minimum total school enrolments")).toHaveValue(
     "50",
   );
@@ -89,6 +90,14 @@ test("rankings load immediately, use exact source values, include ties and handl
   await page.getByLabel("Rank by").selectOption("icsea");
   await expect(page.getByText("No available results")).toBeVisible();
   await page.getByRole("link", { name: "View 2024 results" }).click();
+  await expect(page.getByLabel("Results year")).toHaveValue("2024");
+  if (
+    (await page
+      .locator("details")
+      .filter({ has: page.locator("summary", { hasText: "More filters" }) })
+      .getAttribute("open")) === null
+  )
+    await page.getByText(/More filters/).click();
   await expect(
     page.getByRole("combobox", { name: "Sector", exact: true }),
   ).toBeEnabled();

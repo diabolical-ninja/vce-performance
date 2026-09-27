@@ -28,7 +28,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <header className="border-b border-border bg-white">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-3 px-4 py-2 md:px-5 md:py-4">
             <Suspense>
               <Brand />
             </Suspense>
