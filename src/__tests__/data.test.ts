@@ -106,6 +106,17 @@ describe("URL and data queries", (): void => {
     ).toBe("/compare?schools=a%2Cb");
     expect(hrefWith("/", new URLSearchParams(), {})).toBe("/");
   });
+  it("scopes minimum enrolments to Rankings while preserving shared URL state", (): void => {
+    const params = new URLSearchParams("year=2024&minimum=1000&schools=a,b");
+    expect(hrefWith("/", params, {})).toBe(
+      "/?year=2024&minimum=1000&schools=a%2Cb",
+    );
+    for (const path of ["/schools", "/schools/a", "/compare", "/map", "/about"])
+      expect(hrefWith(path, params, { minimum: "2000" })).toBe(
+        `${path}?year=2024&schools=a%2Cb`,
+      );
+    expect(params.get("minimum")).toBe("1000");
+  });
   it("searches punctuation-normalized names/localities and preserves distinct identities", (): void => {
     expect(
       matchesSchool(

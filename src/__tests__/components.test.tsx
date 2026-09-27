@@ -69,6 +69,27 @@ it("provides shadcn variants, composed links, and active route navigation", (): 
   fireEvent.click(schoolsLink);
   expect(menu).toHaveAttribute("aria-expanded", "false");
 });
+it("drops ranking-only enrolments from navigation and carried school links", (): void => {
+  navigate("/?year=2024&minimum=1000&schools=a");
+  render(
+    <>
+      <Navigation />
+      <CarryLink href="/schools/a">School profile</CarryLink>
+    </>,
+  );
+  expect(screen.getByRole("link", { name: "Schools" })).toHaveAttribute(
+    "href",
+    "/schools?year=2024&schools=a",
+  );
+  expect(screen.getByRole("link", { name: "School profile" })).toHaveAttribute(
+    "href",
+    "/schools/a?year=2024&schools=a",
+  );
+  expect(screen.getByRole("link", { name: "Rankings" })).toHaveAttribute(
+    "href",
+    "/?year=2024&minimum=1000&schools=a",
+  );
+});
 it("exposes all filter modes and retains URL state on changes", (): void => {
   const state = readFilters({}, [2025, 2024]);
   const { rerender } = render(

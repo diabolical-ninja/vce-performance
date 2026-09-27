@@ -64,6 +64,8 @@ export function hrefWith(
     if (value) next.set(key, value);
     else next.delete(key);
   }
+  // Minimum enrolments is only exposed and applied on Rankings.
+  if (path !== "/") next.delete("minimum");
   const query = next.toString();
   return query ? `${path}?${query}` : path;
 }
