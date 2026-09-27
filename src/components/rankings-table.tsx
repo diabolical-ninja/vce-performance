@@ -22,7 +22,7 @@ export function RankingsTable({
   const secondary = measure === "high" ? "median" : "high";
   return (
     <div className="table-wrap">
-      <table>
+      <table className="school-results-table">
         <caption className="sr-only">
           {measures[measure].label} rankings · {yearLabel(year)}
         </caption>
@@ -49,26 +49,11 @@ export function RankingsTable({
                   {rank}
                 </td>
                 <td className="min-w-32 px-3 md:min-w-48 md:px-4">
-                  <CarryLink
-                    className="font-medium"
-                    href={`/schools/${row.id}`}
-                  >
-                    {row.name}
-                  </CarryLink>
-                  <p className="mt-1 text-xs capitalize text-muted">
-                    {row.locality.toLowerCase()}
-                  </p>
-                  <MeanCoverage row={row} measure={measure} label="Mean · " />
-                  <RankingContext row={row} />
-                  {row.aggregation && row.aggregation.endYear < latestYear && (
-                    <p className="mt-1 text-xs font-medium">
-                      Historical record · last recorded{" "}
-                      {row.aggregation.endYear} (latest dataset: {latestYear})
-                    </p>
-                  )}
+                  <RankingSchool row={row} latestYear={latestYear} />
                 </td>
                 <td className="number w-28 min-w-24 px-3 md:w-auto md:min-w-40 md:px-4">
                   <DataValue value={row[measure]} measure={measure} bar />
+                  <MeanCoverage row={row} measure={measure} label="Mean · " />
                 </td>
                 <td className="number hidden md:table-cell">
                   <DataValue value={row[secondary]} measure={secondary} />
@@ -90,6 +75,34 @@ export function RankingsTable({
     </div>
   );
 }
+function RankingSchool({
+  row,
+  latestYear,
+}: {
+  row: SchoolRow;
+  latestYear: number;
+}): ReactElement {
+  return (
+    <div className="relative">
+      <div className="md:min-h-11 md:pr-32">
+        <CarryLink className="font-medium" href={`/schools/${row.id}`}>
+          {row.name}
+        </CarryLink>
+        <p className="mt-1 text-xs capitalize text-muted">
+          {row.locality.toLowerCase()}
+        </p>
+      </div>
+      {row.aggregation && row.aggregation.endYear < latestYear && (
+        <p className="mt-1 text-xs font-medium">
+          Historical record · last recorded {row.aggregation.endYear} (latest
+          dataset: {latestYear})
+        </p>
+      )}
+      <RankingContext row={row} />
+    </div>
+  );
+}
+
 function coverageDiffers(
   row: SchoolRow,
   measure: Measure,

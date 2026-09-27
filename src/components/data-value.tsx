@@ -23,7 +23,7 @@ export function DataValue({
   const maximum = measures[measure].max;
   const percent = 100;
   return (
-    <span className="inline-flex w-full flex-col items-end gap-2 tabular-nums">
+    <span className="inline-flex w-full flex-col items-end gap-1 tabular-nums">
       <span>{formatValue(value, measure)}</span>
       {bar && maximum !== null && (
         <span

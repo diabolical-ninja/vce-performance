@@ -5,34 +5,39 @@ import { MeanCoverage } from "@/components/mean-coverage";
 
 export function RankingContext({ row }: { row: SchoolRow }): ReactElement {
   return (
-    <details className="mt-1 text-xs">
-      <summary className="py-2 font-normal text-muted">School context</summary>
-      {row.aggregation && (
+    <details className="text-xs">
+      <summary className="min-h-11 py-3.5 font-normal text-muted md:absolute md:right-0 md:top-0">
+        School context
+        <span className="sr-only"> for {row.name}</span>
+      </summary>
+      <div className="pt-2">
+        {row.aggregation && (
+          <p className="mb-2">
+            Context uses available-year means; latest sector shown below.
+          </p>
+        )}
         <p className="mb-2">
-          Context uses available-year means; latest sector shown below.
+          {row.profileYear === null
+            ? "No same-year school profile is available."
+            : `${row.sector} sector · ${row.schoolType} · ACARA ${row.profileYear}`}
         </p>
-      )}
-      <p className="mb-2">
-        {row.profileYear === null
-          ? "No same-year school profile is available."
-          : `${row.sector} sector · ${row.schoolType} · ACARA ${row.profileYear}`}
-      </p>
-      <dl className="space-y-2">
-        <div className="flex justify-between gap-4">
-          <dt>{row.aggregation && "Mean · "}Whole-school enrolments</dt>
-          <dd>
-            <DataValue value={row.enrolments} measure="enrolments" />
-            <MeanCoverage row={row} measure="enrolments" />
-          </dd>
-        </div>
-        <div className="flex justify-between gap-4">
-          <dt>{row.aggregation && "Mean · "}ICSEA</dt>
-          <dd>
-            <DataValue value={row.icsea} measure="icsea" />
-            <MeanCoverage row={row} measure="icsea" />
-          </dd>
-        </div>
-      </dl>
+        <dl className="space-y-2">
+          <div className="flex justify-between gap-4">
+            <dt>{row.aggregation && "Mean · "}Whole-school enrolments</dt>
+            <dd>
+              <DataValue value={row.enrolments} measure="enrolments" />
+              <MeanCoverage row={row} measure="enrolments" />
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt>{row.aggregation && "Mean · "}ICSEA</dt>
+            <dd>
+              <DataValue value={row.icsea} measure="icsea" />
+              <MeanCoverage row={row} measure="icsea" />
+            </dd>
+          </div>
+        </dl>
+      </div>
     </details>
   );
 }

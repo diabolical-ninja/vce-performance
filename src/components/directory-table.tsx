@@ -13,7 +13,7 @@ export function DirectoryTable({
 }): ReactElement {
   return (
     <div className="table-wrap">
-      <table>
+      <table className="school-results-table">
         <caption className="sr-only">School results · {year}</caption>
         <thead>
           <tr>
