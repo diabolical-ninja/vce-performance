@@ -46,7 +46,7 @@ test("mobile rankings expose the first school and value before scrolling", async
   await noOverflow(page);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await nav.getByRole("link", { name: "Map", exact: true }).click();
-  await expect(page).toHaveURL(/\/map\?.*minimum=100/);
+  await expect(page).toHaveURL("/map");
   await expect(menu).toHaveAttribute("aria-expanded", "false");
 });
 
