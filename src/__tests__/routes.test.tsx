@@ -75,6 +75,21 @@ it("renders directory rows including missing outcomes, sorting and empty search"
   );
   expect(screen.getByText(/No schools match/)).toBeVisible();
 });
+it("ignores legacy enrolment filters in Schools while applying visible directory filters", async (): Promise<void> => {
+  const params = { year: "2024", q: "Academy", sector: "Catholic" };
+  render(await SchoolsPage({ searchParams: Promise.resolve(params) }));
+  const expected = screen.getByRole("table").textContent;
+  cleanup();
+  render(
+    await SchoolsPage({
+      searchParams: Promise.resolve({ ...params, minimum: "99999" }),
+    }),
+  );
+  expect(screen.getByRole("table")).toHaveTextContent(
+    "Academy of Mary Immaculate",
+  );
+  expect(screen.getByRole("table").textContent).toBe(expected);
+});
 it("composes comparison routes with and without selected records", async (): Promise<void> => {
   render(await ComparePage({ searchParams: Promise.resolve({}) }));
   expect(screen.getByRole("combobox")).toBeVisible();

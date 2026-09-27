@@ -170,6 +170,46 @@ test("directory, profiles, comparison selections and history survive search and 
   await page.goto("/schools?q=zzznomatch");
   await expect(page.getByText(/No schools match/)).toBeVisible();
 });
+test("minimum enrolments stays on Rankings across directory navigation and browser history", async ({
+  page,
+}): Promise<void> => {
+  const annual = rows.filter((row): boolean => row.year === 2024);
+  const params = new URLSearchParams({
+    year: "2024",
+    minimum: "1000",
+    schools: academy.id,
+  });
+  await page.goto(`/?${params}`);
+  await expect(page.getByText(/More filters/)).toContainText(
+    "Enrolments ≥ 1000",
+  );
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("link", { name: "Schools", exact: true }).click();
+  await expect(page).toHaveURL(`/schools?year=2024&schools=${academy.id}`);
+  await expect(page.locator("tbody tr")).toHaveCount(annual.length);
+  await expect(
+    page.getByRole("checkbox", { name: `Compare ${academy.name}` }),
+  ).toBeChecked();
+  await page.reload();
+  await expect(page.locator("tbody tr")).toHaveCount(annual.length);
+  await page.goBack();
+  await expect(page).toHaveURL(`/?${params}`);
+  await expect(page.getByText(/More filters/)).toContainText(
+    "Enrolments ≥ 1000",
+  );
+  await page.goForward();
+  await expect(page.locator("tbody tr")).toHaveCount(annual.length);
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("link", { name: "Rankings", exact: true }).click();
+  await expect(page).toHaveURL(`/?year=2024&schools=${academy.id}`);
+  await page.getByText(/More filters/).click();
+  await expect(page.getByLabel("Minimum total school enrolments")).toHaveValue(
+    "50",
+  );
+  await page.goto(`/schools?${params}`);
+  await expect(page.locator("tbody tr")).toHaveCount(annual.length);
+});
 test("comparison picker supports twelve schools, tooltips, persistent annual tables and all measures", async ({
   page,
 }): Promise<void> => {

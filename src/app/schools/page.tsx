@@ -16,7 +16,10 @@ export default async function SchoolsPage({
   searchParams: Promise<Params>;
 }): Promise<React.ReactElement> {
   const { rows, years, state } = await pageData(searchParams);
-  const filtered = sortDirectory(filterRows(rows, state), state.sort);
+  const filtered = sortDirectory(
+    filterRows(rows, { ...state, minimum: 0 }),
+    state.sort,
+  );
   const context = rows.some(
     (row): boolean => row.year === state.year && row.profileYear !== null,
   );
