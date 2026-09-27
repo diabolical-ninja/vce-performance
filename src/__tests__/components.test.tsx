@@ -252,24 +252,32 @@ it("renders ranking measures, full-range bars and unavailable values", (): void 
       entries={[{ row: base, rank: 1 }]}
       measure="median"
       year={2014}
+      latestYear={2025}
     />,
   );
-  expect(screen.getByText("50")).toBeVisible();
+  expect(
+    screen.getByRole("columnheader", { name: "Median study score" }),
+  ).toHaveTextContent(/^Median study score$/);
   rerender(
     <RankingsTable
       entries={[{ row: base, rank: 1 }]}
       measure="high"
       year={2014}
+      latestYear={2025}
     />,
   );
   expect(
     screen.getByRole("columnheader", { name: "Median study score" }),
   ).toBeVisible();
+  expect(
+    screen.getByRole("columnheader", { name: "Study scores 40+ (%)" }),
+  ).toHaveTextContent(/^Study scores 40\+ \(%\)$/);
   rerender(
     <RankingsTable
       entries={[{ row: base, rank: 1 }]}
       measure="icsea"
       year={2014}
+      latestYear={2025}
     />,
   );
   expect(screen.queryByText("50")).not.toBeInTheDocument();
@@ -278,6 +286,7 @@ it("renders ranking measures, full-range bars and unavailable values", (): void 
       entries={[{ row: { ...base, profileYear: null }, rank: 1 }]}
       measure="median"
       year={2025}
+      latestYear={2025}
     />,
   );
   expect(

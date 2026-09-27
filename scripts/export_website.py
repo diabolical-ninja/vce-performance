@@ -69,7 +69,7 @@ def export(source: Path = SOURCE, target: Path = TARGET) -> dict:
     if len(set(identities)) != len(identities):
         raise ValueError("Duplicate identity/year: review source rows before publishing")
     payload = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "sourceSha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "rows": rows,
         "allYears": summarize(rows, MEASURES),

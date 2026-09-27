@@ -20,13 +20,16 @@ def summarize(rows: list[dict], measures: dict[str, str]) -> list[dict]:
             for key in ("lat", "lng", "locationYear"):
                 summary[key] = locations[-1][key]
         counts = {}
+        years = {}
         for measure in measures:
-            values = [row[measure] for row in history if row[measure] is not None]
+            available = [row for row in history if row[measure] is not None]
+            values = [row[measure] for row in available]
+            years[measure] = [row["year"] for row in available]
             counts[measure] = len(values)
             summary[measure] = fsum(values) / len(values) if values else None
         summary["aggregation"] = {
             "startYear": history[0]["year"], "endYear": history[-1]["year"],
-            "counts": counts,
+            "counts": counts, "years": years,
         }
         summaries.append(summary)
     return summaries

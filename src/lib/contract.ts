@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const limits = {
+  schemaVersion: 3,
   rate: 100,
   firstYear: 2014,
   lastYear: 2100,
@@ -16,6 +17,15 @@ const yearCount = z.number().int().nonnegative();
 const aggregation = z.object({
   startYear: year,
   endYear: year,
+  years: z.object({
+    median: z.array(year),
+    high: z.array(year),
+    completion: z.array(year),
+    tertiary: z.array(year),
+    icsea: z.array(year),
+    enrolments: z.array(year),
+    staff: z.array(year),
+  }),
   counts: z.object({
     median: yearCount,
     high: yearCount,
@@ -49,7 +59,7 @@ const row = z.object({
   aggregation: aggregation.optional(),
 });
 export const datasetSchema = z.object({
-  schemaVersion: z.literal(2),
+  schemaVersion: z.literal(limits.schemaVersion),
   sourceSha256: z.string().length(limits.hashLength),
   rows: z.array(row).min(1),
   allYears: z.array(row.extend({ aggregation })).min(1),

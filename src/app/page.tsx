@@ -38,10 +38,11 @@ export default async function RankingsPage({
       <Filters state={state} years={years} context={context} />
       <CoverageNote year={state.year} context={context} />
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <h2>Top {state.top} schools</h2>
+        <h2>Top {state.top} school source records</h2>
         <p className="text-xs text-muted">
           {available} source records ranked · {yearLabel(state.year)} ·{" "}
           {measures[state.measure].label}
+          {state.year === ALL_YEARS && " · Available-year means"}
         </p>
       </div>
       {entries.length ? (
@@ -49,6 +50,7 @@ export default async function RankingsPage({
           entries={entries}
           measure={state.measure}
           year={state.year}
+          latestYear={Math.max(...years)}
         />
       ) : (
         <div className="notice">

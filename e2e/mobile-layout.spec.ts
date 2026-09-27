@@ -29,7 +29,7 @@ test("mobile rankings expose the first school and value before scrolling", async
   await page.reload();
   await page.waitForLoadState("networkidle");
   await expect(more).toContainText("Enrolments ≥ 100");
-  const coverage = page.getByText(/All years: unweighted annual averages/);
+  const coverage = page.getByText(/All years: available-year means/);
   await coverage.press("Enter");
   await expect(page.getByText(/not a pooled student median/)).toBeVisible();
   await noOverflow(page);
