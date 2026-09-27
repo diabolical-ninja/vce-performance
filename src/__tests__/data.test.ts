@@ -202,7 +202,7 @@ describe("visualization math", (): void => {
       [base, { ...base, year: 2016 }],
       [2014, 2015, 2016],
       "median",
-      [0, 50],
+      { domain: [0, 50] },
     );
     expect(points[1].value).toBeNull();
     expect(linePath(points).match(/M/g)).toHaveLength(2);
@@ -213,20 +213,18 @@ describe("visualization math", (): void => {
           [base, { ...base, year: 2015 }],
           [2014, 2015],
           "median",
-          [0, 50],
+          { domain: [0, 50] },
         ),
       ),
     ).toContain("L");
-    expect(chartPoints(base, [base], [2014], "median", [0, 50])[0].x).toBe(65);
+    expect(
+      chartPoints(base, [base], [2014], "median", { domain: [0, 50] })[0].x,
+    ).toBe(65);
     expect(
       linePath(
-        chartPoints(
-          base,
-          [{ ...base, median: null }],
-          [2014],
-          "median",
-          [0, 50],
-        ),
+        chartPoints(base, [{ ...base, median: null }], [2014], "median", {
+          domain: [0, 50],
+        }),
       ),
     ).toBe("");
   });

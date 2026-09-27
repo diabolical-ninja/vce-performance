@@ -33,6 +33,14 @@ vi.mock("next/navigation", (): object => ({
   },
 }));
 HTMLElement.prototype.scrollIntoView = vi.fn();
+vi.stubGlobal(
+  "ResizeObserver",
+  vi.fn((): ResizeObserver => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  })),
+);
 // Reproduce Next's native-history subscription for presentation-only URL state.
 const originalPushState = window.history.pushState.bind(window.history);
 window.history.pushState = (

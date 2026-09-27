@@ -1,4 +1,5 @@
-import type { ReactElement } from "react";
+"use client";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { ChartObservation } from "@/components/chart-observation";
 import {
   chartDomain,
@@ -25,22 +26,31 @@ export function TrendChart({
   full: boolean;
 }): ReactElement {
   const domain = chartDomain(rows, measure, full);
+  const svg = useRef<SVGSVGElement>(null);
+  const [width, setWidth] = useState(plot.width);
+  const layout = { ...plot, width };
+  useEffect((): (() => void) => {
+    const observer = new ResizeObserver(([entry]): void => {
+      if (entry.contentRect.width > 0) setWidth(entry.contentRect.width);
+    });
+    observer.observe(svg.current!);
+    return (): void => observer.disconnect();
+  }, []);
   return (
-    <div
-      className="overflow-x-auto p-4"
-      tabIndex={0}
-      role="region"
-      aria-label="Scrollable annual trend chart"
-    >
+    <div className="p-4" role="region" aria-label="Annual trend chart">
       <svg
+        ref={svg}
         role="group"
         aria-label={`Annual ${measures[measure].label}. Exact values are available in the annual data table.`}
-        viewBox={`0 0 ${plot.width} ${plot.height}`}
-        className="w-full min-w-[680px]"
+        viewBox={`0 0 ${layout.width} ${layout.height}`}
+        className="block h-[310px] w-full"
       >
-        <ChartAxes years={years} domain={domain} />
+        <ChartAxes years={years} domain={domain} layout={layout} />
         {schools.map((school, index): ReactElement => {
-          const points = chartPoints(school, rows, years, measure, domain),
+          const points = chartPoints(school, rows, years, measure, {
+              domain,
+              layout,
+            }),
             style = seriesStyles[index];
           return (
             <g key={school.id}>
@@ -90,11 +100,27 @@ export function TrendChart({
 function ChartAxes({
   years,
   domain,
+  layout,
 }: {
   years: number[];
   domain: [number, number];
+  layout: typeof plot;
 }): ReactElement {
   const ticks = 4;
+  const plotWidth = layout.width - layout.left - layout.right;
+  const yearLabelSpacing = 60;
+  // Keep both endpoints and spread readable year labels across the full period.
+  const yearLabelCount = Math.min(
+    years.length,
+    Math.max(2, Math.floor(plotWidth / yearLabelSpacing) + 1),
+  );
+  const yearIndices = Array.from(
+    { length: yearLabelCount },
+    (_, index): number =>
+      Math.round(
+        (index * (years.length - 1)) / Math.max(1, yearLabelCount - 1),
+      ),
+  );
   const labelOffset = { x: 10, y: 4, bottom: 15 };
   const fractions = Array.from(
     { length: ticks + 1 },
@@ -103,18 +129,19 @@ function ChartAxes({
   return (
     <g fill="#5D6E82" fontSize="12">
       {fractions.map((fraction): ReactElement => {
-        const y = plot.top + fraction * (plot.height - plot.top - plot.bottom);
+        const y =
+          layout.top + fraction * (layout.height - layout.top - layout.bottom);
         return (
           <g key={fraction}>
             <line
-              x1={plot.left}
-              x2={plot.width - plot.right}
+              x1={layout.left}
+              x2={layout.width - layout.right}
               y1={y}
               y2={y}
               stroke="#DCE4EF"
             />
             <text
-              x={plot.left - labelOffset.x}
+              x={layout.left - labelOffset.x}
               y={y + labelOffset.y}
               textAnchor="end"
             >
@@ -123,18 +150,14 @@ function ChartAxes({
           </g>
         );
       })}
-      {years.map((year, index): ReactElement => (
+      {yearIndices.map((index): ReactElement => (
         <text
-          key={year}
-          x={
-            plot.left +
-            (index / Math.max(1, years.length - 1)) *
-              (plot.width - plot.left - plot.right)
-          }
-          y={plot.height - labelOffset.bottom}
+          key={years[index]}
+          x={layout.left + (index / Math.max(1, years.length - 1)) * plotWidth}
+          y={layout.height - labelOffset.bottom}
           textAnchor="middle"
         >
-          {year}
+          {years[index]}
         </text>
       ))}
     </g>

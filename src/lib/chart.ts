@@ -51,11 +51,11 @@ export function chartPoints(
   rows: SchoolRow[],
   years: number[],
   measure: Measure,
-  domain: [number, number],
+  { domain, layout = plot }: { domain: [number, number]; layout?: typeof plot },
 ): ChartPoint[] {
   const [minimum, maximum] = domain;
-  const width = plot.width - plot.left - plot.right,
-    height = plot.height - plot.top - plot.bottom;
+  const width = layout.width - layout.left - layout.right,
+    height = layout.height - layout.top - layout.bottom;
   return years.map((year, index): ChartPoint => {
     const row = rows.find(
       (entry): boolean => entry.id === school.id && entry.year === year,
@@ -64,9 +64,9 @@ export function chartPoints(
     return {
       year,
       value,
-      x: plot.left + (index / Math.max(1, years.length - 1)) * width,
+      x: layout.left + (index / Math.max(1, years.length - 1)) * width,
       y:
-        plot.top +
+        layout.top +
         ((maximum - (value ?? minimum)) / (maximum - minimum)) * height,
     };
   });
