@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import type { SchoolRow } from "@/lib/contract";
 import { DataValue } from "@/components/data-value";
+import { MeanCoverage } from "@/components/mean-coverage";
 
 export function RankingContext({ row }: { row: SchoolRow }): ReactElement {
   return (
@@ -8,8 +9,7 @@ export function RankingContext({ row }: { row: SchoolRow }): ReactElement {
       <summary className="py-2 font-normal text-muted">School context</summary>
       {row.aggregation && (
         <p className="mb-2">
-          Context averages · {row.aggregation.startYear}–
-          {row.aggregation.endYear}; latest sector shown below.
+          Context uses available-year means; latest sector shown below.
         </p>
       )}
       <p className="mb-2">
@@ -19,15 +19,17 @@ export function RankingContext({ row }: { row: SchoolRow }): ReactElement {
       </p>
       <dl className="space-y-2">
         <div className="flex justify-between gap-4">
-          <dt>Whole-school enrolments</dt>
+          <dt>{row.aggregation && "Mean · "}Whole-school enrolments</dt>
           <dd>
             <DataValue value={row.enrolments} measure="enrolments" />
+            <MeanCoverage row={row} measure="enrolments" />
           </dd>
         </div>
         <div className="flex justify-between gap-4">
-          <dt>ICSEA</dt>
+          <dt>{row.aggregation && "Mean · "}ICSEA</dt>
           <dd>
             <DataValue value={row.icsea} measure="icsea" />
+            <MeanCoverage row={row} measure="icsea" />
           </dd>
         </div>
       </dl>

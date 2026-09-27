@@ -12,14 +12,21 @@ export function CoverageNote({
     return (
       <details className="mb-3 text-xs leading-relaxed text-muted">
         <summary id="context-note" className="min-h-11">
-          All years: unweighted annual averages · Coverage details
+          All years: available-year means · Coverage varies by record and
+          measure
         </summary>
         <p className="pb-3">
-          Averages use available annual values, with available-year counts. The
-          mean of annual school medians is not a pooled student median.
-          Enrolments use the average whole-school count (default minimum 50 on
-          Rankings), not the VCE cohort. Sector uses the latest available
-          profile; map locations use the latest recorded coordinates.
+          Means are unweighted averages of available annual values; missing
+          values are excluded. In rankings, coverage beneath the school name
+          applies to the shown means unless a different coverage is noted beside
+          a value. Each period spans the first and last available year; the
+          count excludes missing years within that period. Historical records
+          end before the latest dataset year, which does not imply a school has
+          closed. Matching names or localities are not merged. The mean of
+          annual school medians is not a pooled student median. Enrolments use
+          the average whole-school count (default minimum 50 on Rankings), not
+          the VCE cohort. Sector uses the latest available profile; map
+          locations use the latest recorded coordinates.
         </p>
       </details>
     );

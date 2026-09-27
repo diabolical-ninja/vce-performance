@@ -61,6 +61,8 @@ class WebsiteExportTests(unittest.TestCase):
         self.assertEqual(result["high"], old["high"])
         self.assertEqual(result["aggregation"]["counts"]["median"], 2)
         self.assertEqual(result["aggregation"]["counts"]["high"], 1)
+        self.assertEqual(result["aggregation"]["years"]["median"], [2014, 2025])
+        self.assertEqual(result["aggregation"]["years"]["high"], [2014])
         self.assertEqual(result["profileYear"], 2014)
         self.assertEqual(result["locationYear"], 2014)
         self.assertEqual(result["sector"], "Catholic")
@@ -68,6 +70,23 @@ class WebsiteExportTests(unittest.TestCase):
         unavailable = summarize([unknown], MEASURES)[0]
         self.assertIsNone(unavailable["median"])
         self.assertEqual(unavailable["aggregation"]["counts"]["median"], 0)
+        self.assertEqual(unavailable["aggregation"]["years"]["median"], [])
         self.assertIsNone(unavailable["profileYear"])
         self.assertIsNone(unavailable["locationYear"])
         self.assertEqual(len(summarize([old, {**old, "id": "other-campus"}], MEASURES)), 2)
+
+    def test_coverage_tracks_each_measure_and_includes_zero(self):
+        base = convert(self.rows[0], 2)
+        history = [
+            {**base, "year": 2014, "high": None},
+            {**base, "year": 2015, "high": 0},
+            {**base, "year": 2016, "high": None},
+            {**base, "year": 2017, "high": 20},
+            {**base, "year": 2018, "high": None},
+        ]
+        result = summarize(history, MEASURES)[0]
+        self.assertEqual(result["high"], 10)
+        self.assertEqual(result["aggregation"]["years"]["high"], [2015, 2017])
+        self.assertEqual(result["aggregation"]["counts"]["high"], 2)
+        self.assertEqual(result["aggregation"]["startYear"], 2014)
+        self.assertEqual(result["aggregation"]["endYear"], 2018)

@@ -32,6 +32,12 @@ it("renders independent rankings, missing context and absent measures server-sid
     "VCE school rankings",
   );
   expect(screen.getByRole("table")).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Top 5 school source records" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/Coverage varies by record and measure/),
+  ).toBeVisible();
   cleanup();
   render(
     await RankingsPage({
