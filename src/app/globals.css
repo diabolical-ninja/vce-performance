@@ -66,6 +66,9 @@
   .number {
     @apply text-right tabular-nums;
   }
+  .school-results-table td {
+    @apply md:py-3;
+  }
 }
 .leaflet-container {
   font-family: inherit;

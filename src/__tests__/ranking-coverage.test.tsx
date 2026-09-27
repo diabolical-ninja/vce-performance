@@ -32,9 +32,9 @@ it("shows shared coverage once and detects different contributing years even wit
   ).toHaveTextContent(/^Study scores 40\+ \(%\)$/);
   const cells = screen.getAllByRole("cell");
   expect(
-    within(cells[1]).getByText(/Mean · 2014–2018 · 3 years/),
+    within(cells[2]).getByText(/Mean · 2014–2018 · 3 years/),
   ).toBeVisible();
-  for (const cell of cells.slice(2)) {
+  for (const cell of cells.slice(3)) {
     expect(
       within(cell).queryByText(/Available years:/),
     ).not.toBeInTheDocument();
@@ -56,10 +56,10 @@ it("shows shared coverage once and detects different contributing years even wit
   );
   const updatedCells = screen.getAllByRole("cell");
   expect(
-    within(updatedCells[1]).getByText(". Available years: 2014, 2017, 2018"),
+    within(updatedCells[2]).getByText(". Available years: 2014, 2017, 2018"),
   ).toBeInTheDocument();
   expect(
-    within(updatedCells[2]).queryByText(/Available years:/),
+    within(updatedCells[1]).queryByText(/Mean · 2014/),
   ).not.toBeInTheDocument();
   for (const cell of updatedCells.slice(3)) {
     expect(
@@ -120,7 +120,7 @@ it("shows each mean's own coverage, including gaps, single years and unavailable
   expect(screen.getByText(/2018 · 1 year/)).toBeVisible();
 });
 
-it("shows Albert Park's main coverage beneath its name and only completion's exception beside its value", (): void => {
+it("shows Albert Park's main coverage beside its result and only completion's exception beside its value", (): void => {
   const row = getDataset().allYears.find(
     (record): boolean => record.name === "Albert Park College",
   )!;
@@ -134,9 +134,9 @@ it("shows Albert Park's main coverage beneath its name and only completion's exc
   );
   const cells = screen.getAllByRole("cell");
   expect(
-    within(cells[1]).getByText(/Mean · 2014–2025 · 12 years/),
+    within(cells[2]).getByText(/Mean · 2014–2025 · 12 years/),
   ).toBeVisible();
-  for (const cell of cells.slice(2, 4)) {
+  for (const cell of cells.slice(3, 4)) {
     expect(
       within(cell).queryByText(/Available years:/),
     ).not.toBeInTheDocument();
