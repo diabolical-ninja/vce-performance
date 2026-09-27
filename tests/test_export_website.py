@@ -43,6 +43,46 @@ class WebsiteExportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Duplicate identity"):
                 export(source, Path(folder) / "output.json")
 
+    def test_reviewed_school_mappings_use_historical_identities(self):
+        # Evidence and merger dates: raw_data/school_name_joining_keys.md.
+        cases = [
+            ("Shepparton High School", "Shepparton High School", "45465", 2019, "Government", "Secondary"),
+            ("Sherbrooke Community School", "Sherbrooke Community School", "45316", 2025, "Government", "Combined"),
+            ("Siena College", "Siena College Ltd", "45857", 2025, "Catholic", "Secondary"),
+            ("Simonds Catholic College", "Simonds Catholic College", "45631", 2025, "Catholic", "Secondary"),
+        ]
+        with (SOURCE.parent / "raw_data" / "school_name_joining_keys.csv").open(newline="") as handle:
+            mappings = list(csv.DictReader(handle))
+        for name, profile_name, acara_id, last_year, sector, school_type in cases:
+            with self.subTest(school=name):
+                matches = [row for row in mappings if row["vce_school_name"] == name]
+                self.assertEqual(len(matches), 1)
+                self.assertEqual(matches[0]["acara_school_name"], profile_name)
+                self.assertEqual(matches[0]["ACARA SML ID"], acara_id)
+                history = [row for row in self.rows if row["School"] == name]
+                self.assertEqual([int(row["year"]) for row in history], list(range(2014, last_year + 1)))
+                for row in history:
+                    self.assertEqual(number(row["ACARA SML ID"]), int(acara_id))
+                    expected_sector = sector if int(row["year"]) <= 2024 else ""
+                    expected_type = school_type if int(row["year"]) <= 2024 else ""
+                    self.assertEqual(row["School Sector"], expected_sector)
+                    self.assertEqual(row["School Type"], expected_type)
+
+    def test_reviewed_profiles_have_their_own_annual_context(self):
+        # Independent samples from the ACARA workbook, not the analytical CSV.
+        cases = [
+            ("Shepparton High School", "2019", 924, 492, 49),
+            ("Sherbrooke Community School", "2024", 980, 108, 17),
+            ("Siena College", "2024", 1143, 733, 77),
+            ("Simonds Catholic College", "2024", 1045, 389, 40),
+        ]
+        for name, year, icsea, enrolments, staff in cases:
+            with self.subTest(school=name, year=year):
+                matches = [row for row in self.rows if row["School"] == name and row["year"] == year]
+                self.assertEqual(len(matches), 1)
+                row = convert(matches[0], 2)
+                self.assertEqual((row["icsea"], row["enrolments"], row["staff"]), (icsea, enrolments, staff))
+
     def test_campuses_stay_separate_and_context_is_dated(self):
         first = convert(self.rows[0], 2)
         other = convert({**self.rows[0], "Locality": "OTHER"}, 3)
