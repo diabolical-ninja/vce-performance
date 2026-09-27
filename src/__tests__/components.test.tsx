@@ -363,6 +363,11 @@ it("shows graph tooltips on hover, focus and touch, and dismisses with Escape", 
   expect(screen.getByRole("tooltip")).toBeVisible();
   fireEvent.keyDown(point, { key: "Escape" });
   expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  for (const key of ["Enter", " "]) {
+    fireEvent.keyDown(point, { key });
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    fireEvent.keyDown(point, { key: "Escape" });
+  }
   fireEvent.click(point);
   expect(screen.getByRole("tooltip")).toBeVisible();
   fireEvent.blur(point);

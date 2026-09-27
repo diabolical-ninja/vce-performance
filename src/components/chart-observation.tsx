@@ -49,6 +49,10 @@ export function ChartObservation({
         onClick={(event): void => show(event.currentTarget)}
         onKeyDown={(event): void => {
           if (event.key === "Escape") setPosition(null);
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            show(event.currentTarget);
+          }
         }}
       />
       {position &&

@@ -68,8 +68,9 @@ export function ComparisonChart({
         </div>
         <p className="px-5 pb-4 text-xs text-muted">
           Straight segments connect reported observations, not estimates for
-          intervening years. Missing annual values break the lines. Swipe the
-          chart horizontally on small screens; labels retain their size.
+          intervening years. Missing annual values break the lines. Hover, focus
+          or tap a point for its value; exact values for every year are
+          available in the annual data table.
         </p>
       </section>
       <section className="mt-5" aria-label="Annual data">
