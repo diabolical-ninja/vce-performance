@@ -12,14 +12,14 @@ export function MinimumEnrolments({
 }): ReactElement {
   return (
     <form
-      className="flex items-end gap-2"
+      className="col-span-2 flex min-w-0 items-end gap-2"
       onSubmit={(event): void => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
         onApply("minimum", String(form.get("minimum")));
       }}
     >
-      <label className="flex flex-col gap-2 text-xs font-medium text-muted">
+      <label className="flex min-w-0 flex-1 flex-col gap-2 text-xs font-medium text-muted">
         Minimum total school enrolments
         <input
           name="minimum"
@@ -30,7 +30,7 @@ export function MinimumEnrolments({
           disabled={disabled}
           defaultValue={value}
           key={value}
-          className="w-36"
+          className="w-full md:w-36"
           aria-describedby="context-note"
         />
       </label>

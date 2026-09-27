@@ -67,8 +67,7 @@ export function MapExplorer({
       <p className="mb-3 text-xs text-muted">
         {visible.length} located records in this area ·{" "}
         {rows.length - points.length} omitted because coordinates are
-        unavailable. Equal-sized points show reported values; overlapping points
-        remain separate school records in the list.
+        unavailable.
       </p>
       <div className="mb-4 flex items-center gap-3 text-xs">
         <span>{formatValue(range[0], measure)}</span>
@@ -110,6 +109,10 @@ export function MapExplorer({
           />
         </div>
       </div>
+      <p className="mb-4 text-xs text-muted">
+        Equal-sized points show reported values; overlapping points remain
+        separate school records in the list.
+      </p>
       {selection && (
         <p className="notice mt-4" role="status">
           Selected: {mapLabel(selection, measure)}.{" "}

@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import { measureKeys, measures } from "@/lib/measures";
 import { ALL_YEARS, hrefWith, rankingLimits } from "@/lib/query";
 import { MinimumEnrolments } from "@/components/minimum-enrolments";
+import { FilterSummary } from "@/components/filter-summary";
 import type { FilterState } from "@/types/data";
 
 export function Filters({
@@ -27,7 +28,7 @@ export function Filters({
     });
   }
   return (
-    <div className="mb-5 flex flex-wrap items-end gap-4">
+    <div className="mb-3 grid grid-cols-2 items-end gap-3 md:flex md:flex-wrap md:gap-4 [&_select]:w-full [&_select]:min-w-0">
       {mode !== "compare" && (
         <Field label="Results year">
           <select
@@ -53,30 +54,60 @@ export function Filters({
           </select>
         </Field>
       )}
-      {!["compare", "profile"].includes(mode) && (
-        <Field label="Sector">
-          <select
-            value={context ? state.sector : ""}
-            disabled={!context}
-            aria-describedby="context-note"
-            onChange={(event): void => update("sector", event.target.value)}
-          >
-            <option value="">All sectors</option>
-            {["Government", "Catholic", "Independent", "Unknown"].map(
-              (sector): ReactElement => (
-                <option key={sector}>{sector}</option>
-              ),
-            )}
-          </select>
-        </Field>
+      {["rankings", "map"].includes(mode) ? (
+        <details className="col-span-2 min-w-0 md:w-full">
+          <FilterSummary state={state} context={context} mode={mode} />
+          <div className="grid grid-cols-2 items-end gap-3 pt-1 md:flex md:flex-wrap md:gap-4">
+            <SectorFilter state={state} context={context} update={update} />
+            <ExtraFilters
+              mode={mode}
+              state={state}
+              context={context}
+              update={update}
+            />
+          </div>
+        </details>
+      ) : (
+        <>
+          {!["compare", "profile"].includes(mode) && (
+            <SectorFilter state={state} context={context} update={update} />
+          )}
+          <ExtraFilters
+            mode={mode}
+            state={state}
+            context={context}
+            update={update}
+          />
+        </>
       )}
-      <ExtraFilters
-        mode={mode}
-        state={state}
-        context={context}
-        update={update}
-      />
     </div>
+  );
+}
+function SectorFilter({
+  state,
+  context,
+  update,
+}: {
+  state: FilterState;
+  context: boolean;
+  update: (key: string, value: string) => void;
+}): ReactElement {
+  return (
+    <Field label="Sector">
+      <select
+        value={context ? state.sector : ""}
+        disabled={!context}
+        aria-describedby="context-note"
+        onChange={(event): void => update("sector", event.target.value)}
+      >
+        <option value="">All sectors</option>
+        {["Government", "Catholic", "Independent", "Unknown"].map(
+          (sector): ReactElement => (
+            <option key={sector}>{sector}</option>
+          ),
+        )}
+      </select>
+    </Field>
   );
 }
 function ExtraFilters({
@@ -136,7 +167,7 @@ function Field({
   children: ReactElement;
 }): ReactElement {
   return (
-    <label className="flex flex-col gap-2 text-xs font-medium text-muted">
+    <label className="flex min-w-0 flex-col gap-2 text-xs font-medium text-muted">
       {label}
       {children}
     </label>
